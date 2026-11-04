@@ -77,3 +77,13 @@ def test_to_state_shape():
     assert s["engine"] == "python" and s["totalModels"] == 2 and s["models"][0].keys() == {"atoms", "costs"}
     assert "error" not in s
     assert asp.solve("b :- c(.").to_state()["error"]
+
+
+def test_multi_file_diagnostics_point_at_the_right_file(tmp_path):
+    a, b = tmp_path / "instance.lp", tmp_path / "encoding.lp"
+    a.write_text("edge(1,2).\nedge(2,3).\n")
+    b.write_text("% rules\nreach(X,Y) :- edge(X,Y).\nbroken :- reach(.\n")
+    r = asp.solve([a, b])
+    d = r.diagnostics[0]
+    assert (d.file, d.line, d.severity) == ("encoding.lp", 3, "error")
+    assert r.to_state()["diagnostics"][0]["file"] == "encoding.lp"

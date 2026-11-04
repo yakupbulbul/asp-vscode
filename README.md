@@ -56,7 +56,7 @@ ancestor(X,Y) :- parent(X,Y).
 ancestor(X,Z) :- parent(X,Y), ancestor(Y,Z).
 ```
 
-It also offers `asp_studio.solve()`, `asp_studio.show()` and `python -m asp_studio file.lp --open` (standalone HTML report). See [`python/README.md`](python/README.md) and `python/examples/demo.ipynb`.
+It also offers `asp_studio.solve()`, `asp_studio.show()` and `asp-studio file.lp --open` (standalone HTML report). See [`python/README.md`](python/README.md) and `python/examples/demo.ipynb`.
 
 ## Animator limits
 

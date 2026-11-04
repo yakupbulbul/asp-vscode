@@ -3,7 +3,7 @@
 Answer sets, a graph and a **step-by-step fixpoint animator** for Answer Set Programming, in Jupyter, VS Code notebooks and on the command line. It uses the [clingo](https://potassco.org/clingo/) Python API and shares its visualizer with the *ASP Studio* VS Code extension.
 
 ```bash
-pip install "asp-studio[notebook]"
+pip install "asp-studio[notebook]"      # Python 3.9 or newer
 ```
 
 ## In a notebook
@@ -51,9 +51,12 @@ asp.show(res, tab="graph")
 ## Command line
 
 ```bash
-python -m asp_studio program.lp --open          # writes program.html and opens it
-python -m asp_studio instance.lp encoding.lp -n 3 --tab answers
+asp-studio program.lp --open                    # writes program.html and opens it
+asp-studio instance.lp encoding.lp -n 3 --tab answers
+python -m asp_studio program.lp                 # same thing
 ```
+
+Exit code `0` = solved, `1` = the program has an error (positions are printed as `file:line:col`), `2` = bad arguments or unreadable input.
 
 ## Notes
 

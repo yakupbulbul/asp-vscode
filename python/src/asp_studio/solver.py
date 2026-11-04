@@ -5,7 +5,7 @@ import re
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Sequence, Union
+from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple, Union
 
 import clingo
 
@@ -23,6 +23,7 @@ class Diagnostic:
     end_col: int
     severity: str
     message: str
+    file: str = "program"
 
 
 @dataclass(repr=False)
@@ -81,7 +82,7 @@ class Result:
             "stderr": self.stderr,
             "capped": 0,
             "diagnostics": [
-                {"sourceIndex": 0, "file": "program", "line": d.line, "col": d.col, "endCol": d.end_col,
+                {"sourceIndex": 0, "file": d.file, "line": d.line, "col": d.col, "endCol": d.end_col,
                  "severity": d.severity, "message": d.message}
                 for d in self.diagnostics
             ],
@@ -100,13 +101,29 @@ class Result:
         show(self, **kwargs)
 
 
-def _read(programs: Union[Program, Sequence[Program]]) -> str:
+def _read(programs: Union[Program, Sequence[Program]]) -> Tuple[str, List[Tuple[str, int]]]:
+    """Join the programs; also return (name, line count) per part so messages can be mapped back to their file."""
     items: Iterable[Program] = [programs] if isinstance(programs, (str, Path)) else programs
-    parts = [p.read_text(encoding="utf-8") if isinstance(p, Path) else p for p in items]
-    return "\n".join(parts) + "\n"
+    parts: List[str] = []
+    sources: List[Tuple[str, int]] = []
+    for p in items:
+        text = p.read_text(encoding="utf-8") if isinstance(p, Path) else p
+        parts.append(text)
+        sources.append((p.name if isinstance(p, Path) else "program", len(text.split("\n"))))
+    return "\n".join(parts) + "\n", sources
 
 
-def _parse_messages(messages: Sequence[str]) -> List[Diagnostic]:
+def _locate(sources: Sequence[Tuple[str, int]], line: int) -> Tuple[str, int]:
+    """Map a 1-based line of the joined program to (file name, line in that file)."""
+    start = 0
+    for name, count in sources:
+        if line - 1 < start + count:
+            return name, line - start
+        start += count
+    return (sources[-1][0], 1) if sources else ("program", line)
+
+
+def _parse_messages(messages: Sequence[str], sources: Sequence[Tuple[str, int]]) -> List[Diagnostic]:
     out: List[Diagnostic] = []
     for msg in messages:
         lines = msg.split("\n")
@@ -121,7 +138,8 @@ def _parse_messages(messages: Sequence[str]) -> List[Diagnostic]:
         if extra:
             text += "\n" + "\n".join(extra)
         sev = {"error": "error", "info": "info"}.get(m.group(6), "warning")
-        out.append(Diagnostic(int(m.group(1)), col, end, sev, text))
+        name, line = _locate(sources, int(m.group(1)))
+        out.append(Diagnostic(line, col, end, sev, text, name))
     return out
 
 
@@ -139,7 +157,7 @@ def solve(
     either a list or one string such as ``"--opt-mode=optN -c n=6"``. ``timeout`` is in seconds.
     With optimisation statements and a finished search only the optimal models are kept.
     """
-    text = _read(program)
+    text, sources = _read(program)
     opts = options.split() if isinstance(options, str) else list(options)
     args = [str(max(0, int(models)))] + opts
     res = Result(program=text, command="clingo.Control(" + repr(args) + ")")
@@ -172,7 +190,7 @@ def solve(
                 res.time = None
     except RuntimeError as e:
         res.error = str(e)
-    res.diagnostics = _parse_messages(messages)
+    res.diagnostics = _parse_messages(messages, sources)
     if res.error and not res.timed_out and any(d.severity == "error" for d in res.diagnostics):
         res.error = "The program has a syntax or semantic error."
     res.stderr = "".join(m if m.endswith("\n") else m + "\n" for m in messages)

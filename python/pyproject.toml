@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "Answer Set Programming visualizer for Jupyter, VS Code notebooks and the command line: answer sets, graph and a step-by-step fixpoint animator."
 readme = "README.md"
 license = { text = "MIT" }
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 authors = [{ name = "yakupbulbul" }]
 keywords = ["asp", "answer set programming", "clingo", "jupyter", "visualization", "potassco"]
 classifiers = [
@@ -24,6 +24,9 @@ dependencies = ["clingo>=5.5"]
 [project.optional-dependencies]
 notebook = ["ipython"]
 test = ["pytest", "ipython"]
+
+[project.scripts]
+asp-studio = "asp_studio.__main__:main"
 
 [project.urls]
 Homepage = "https://github.com/yakupbulbul/asp-vscode"
