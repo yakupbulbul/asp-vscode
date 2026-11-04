@@ -97,6 +97,16 @@ Inside the visualizer: `←` `→` step, `Space` play or pause, `R` reset.
 
 Theme colours `asp.activeRuleBackground` and `asp.activeRuleBorder` can be overridden in `workbench.colorCustomizations`.
 
+## Install
+
+Download `asp-studio-<version>.vsix` from the [latest release](https://github.com/yakupbulbul/asp-vscode/releases/latest), then either run
+
+```bash
+code --install-extension asp-studio-<version>.vsix
+```
+
+or open the Extensions view, choose **… → Install from VSIX…** and pick the file. Works on macOS, Windows and Linux; no other software is required (a WebAssembly clingo is bundled).
+
 ## Install from source
 
 ```bash
