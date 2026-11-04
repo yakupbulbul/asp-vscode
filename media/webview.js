@@ -3,6 +3,7 @@
 (function () {
   "use strict";
   const vscode = acquireVsCodeApi();
+  const EMBED = !!window.__ASP_EMBED__;               // notebook output: no editor, no solver controls
   const NS = "http://www.w3.org/2000/svg";
   const $ = id => document.getElementById(id);
   const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -47,6 +48,7 @@
     return m ? { pred: m[1], args: m[2] === undefined ? [] : splitTop(m[2], ",") } : null;
   }
   const atomPred = a => (a.match(/^-?([a-z][A-Za-z0-9_']*)/) || [, a])[1];
+  const ENGINE_NAMES = { native: "native", python: "Python API", wasm: "WebAssembly" };
   const fmtMs = ms => ms < 1000 ? ms + " ms" : (ms / 1000).toFixed(2) + " s";
 
   function mk(name, attrs = {}) { const e = document.createElementNS(NS, name); for (const k in attrs) e.setAttribute(k, attrs[k]); return e; }
@@ -137,22 +139,26 @@
       meta = `${plural(r.totalModels, "model")}${r.more ? " (more available)" : ""} · ${fmtMs(r.ms)}` + (r.time != null ? ` · clingo ${r.time.toFixed(3)} s` : "");
       if (r.capped && r.more) meta += ` · auto-run limit ${r.capped}`;
     }
-    const engine = r ? `<span class="chip" title="${esc(r.command)}">clingo ${esc(r.version)} · ${r.engine === "native" ? "native" : "WebAssembly"}</span>` +
-      (r.engine === "wasm" ? '<span class="chip link" id="setupLink" title="Install a native clingo (faster than WebAssembly)">get native clingo</span>' : "") : "";
+    const engineName = ENGINE_NAMES[r && r.engine] || "";
+    const engine = r ? `<span class="chip" title="${esc(r.command)}">clingo ${esc(r.version)} · ${engineName}</span>` +
+      (r.engine === "wasm" && !EMBED ? '<span class="chip link" id="setupLink" title="Install a native clingo (faster than WebAssembly)">get native clingo</span>' : "") : "";
     const counts = { models: r && !r.error ? r.totalModels : 0, console: r ? r.diagnostics.length : 0 };
+    $("app").className = EMBED ? "embed" : "";
     $("app").innerHTML = `
       <div class="top">
         <div class="bar">
           <div class="title"><span class="name">${st.file ? esc(st.file.name) : "No ASP file"}</span>${st.file && st.file.scope === "folder" ? '<span class="chip">folder</span>' : ""}${engine}</div>
-          <button class="btn primary" id="solveBtn" ${st.file ? "" : "disabled"} title="Solve (all models)">${ICON.run} Solve</button>
-          <button class="icon-btn" id="settingsBtn" title="Settings" aria-label="Settings">${ICON.gear}</button>
+          ${EMBED ? "" : `<button class="btn primary" id="solveBtn" ${st.file ? "" : "disabled"} title="Solve (all models)">${ICON.run} Solve</button>
+          <button class="icon-btn" id="settingsBtn" title="Settings" aria-label="Settings">${ICON.gear}</button>`}
         </div>
         <div class="summary">${pill}<span>${esc(meta)}</span></div>
         <div class="tabs" role="tablist">${TABS.map(([id, label]) => `<button class="tab" role="tab" data-tab="${id}" aria-selected="${ui.tab === id}">${label}${counts[id] ? `<span class="count">${counts[id]}</span>` : ""}</button>`).join("")}</div>
       </div>
       <main id="main"></main>`;
-    $("solveBtn").onclick = () => vscode.postMessage({ type: "solve" });
-    $("settingsBtn").onclick = () => vscode.postMessage({ type: "openSettings" });
+    if (!EMBED) {
+      $("solveBtn").onclick = () => vscode.postMessage({ type: "solve" });
+      $("settingsBtn").onclick = () => vscode.postMessage({ type: "openSettings" });
+    }
     const sl = $("setupLink"); if (sl) sl.onclick = () => vscode.postMessage({ type: "setup" });
     document.querySelectorAll(".tab").forEach(b => b.onclick = () => { ui.tab = b.dataset.tab; persist(); stopAnim(); renderShell(); renderMain(); });
   }
@@ -221,7 +227,7 @@
         <div class="status-line" id="aStatus" role="status" aria-live="polite"></div>
       </div>
       <div class="grid2">
-        <section class="card"><h3>Rules <span class="muted small" style="text-transform:none;letter-spacing:0">click a rule to jump to its line</span></h3><ul class="rules" id="aRules"></ul></section>
+        <section class="card"><h3>Rules <span class="muted small" style="text-transform:none;letter-spacing:0">${EMBED ? "" : "click a rule to jump to its line"}</span></h3><ul class="rules" id="aRules"></ul></section>
         <section class="card"><h3>Constants &amp; predicates</h3><div class="gwrap"><svg class="graph" id="aSvg" viewBox="0 0 700 380" role="img" aria-label="Graph of derived atoms"></svg><div class="legend" id="aLegend"></div></div></section>
       </div>
       <section class="card"><h3>This round</h3><div id="aExplain"></div></section>
@@ -381,7 +387,7 @@
     main.innerHTML = `<div class="stack">
       ${errorNotice()}
       ${r.diagnostics.length ? `<section class="card"><h3>Problems</h3>${r.diagnostics.map((d, i) => `<div class="diag" data-i="${i}" tabindex="0"><span class="sev ${d.severity}">${sev[d.severity]}</span><span class="msg">${esc(d.message)}</span><span class="where">${esc(d.file)}:${d.line}:${d.col}</span></div>`).join("")}</section>` : ""}
-      <section class="card"><h3>Command</h3><pre class="out">${esc(r.command)}\n<span class="muted">${esc(r.engine === "native" ? "native" : "WebAssembly")} · clingo ${esc(r.version)} · ${fmtMs(r.ms)}</span></pre></section>
+      <section class="card"><h3>Command</h3><pre class="out">${esc(r.command)}\n<span class="muted">${esc(ENGINE_NAMES[r.engine] || r.engine)} · clingo ${esc(r.version)} · ${fmtMs(r.ms)}</span></pre></section>
       <section class="card"><h3>clingo messages</h3><pre class="out">${esc(r.stderr.trim() || "(none)")}</pre></section>
     </div>`;
     bindErrorLink();

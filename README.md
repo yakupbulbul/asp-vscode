@@ -40,6 +40,24 @@ Run **ASP: Set Up Environment…** (or click *get native clingo* in the visualiz
 
 Nothing is downloaded without your confirmation, and nothing outside the extension's storage is changed. **ASP: Remove Private Environment** deletes it again. Without any setup, the bundled WebAssembly clingo keeps working.
 
+## Notebooks and Python
+
+The same visualizer works inside Jupyter and VS Code notebooks through the Python package in [`python/`](python/):
+
+```bash
+pip install -e "python[notebook]"      # from a clone of this repository
+```
+
+```text
+%load_ext asp_studio
+%%asp
+parent(anna,bob). parent(bob,carl).
+ancestor(X,Y) :- parent(X,Y).
+ancestor(X,Z) :- parent(X,Y), ancestor(Y,Z).
+```
+
+It also offers `asp_studio.solve()`, `asp_studio.show()` and `python -m asp_studio file.lp --open` (standalone HTML report). See [`python/README.md`](python/README.md) and `python/examples/demo.ipynb`.
+
 ## Animator limits
 
 The Animator follows a *positive* program (facts and rules without `not`). It does not handle negation, choice rules `{ ... }`, constraints `:- ...` or ranges `1..n`. For those programs the Answer Sets and Graph tabs still work, and the Animator tells you which line is not supported.
@@ -98,7 +116,7 @@ node scripts/preview.js  # renders the visualizer with real data in .preview/ind
 
 Press `F5` in VS Code to start an Extension Development Host.
 
-Layout: `src/` extension host (solver wrapper, controller, helpers) · `media/` webview UI and the fixpoint engine · `vendor/` unmodified clingo-wasm 0.6.0 · `test/` unit tests.
+Layout: `python/` notebook/CLI package · `src/` extension host (solver wrapper, controller, helpers) · `media/` webview UI and the fixpoint engine · `vendor/` unmodified clingo-wasm 0.6.0 · `test/` unit tests.
 
 ## Credits and licence
 

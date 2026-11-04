@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "asp-studio"
+version = "0.1.0"
+description = "Answer Set Programming visualizer for Jupyter, VS Code notebooks and the command line: answer sets, graph and a step-by-step fixpoint animator."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.8"
+authors = [{ name = "yakupbulbul" }]
+keywords = ["asp", "answer set programming", "clingo", "jupyter", "visualization", "potassco"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Framework :: Jupyter",
+  "Intended Audience :: Education",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Topic :: Scientific/Engineering :: Visualization",
+]
+dependencies = ["clingo>=5.5"]
+
+[project.optional-dependencies]
+notebook = ["ipython"]
+test = ["pytest", "ipython"]
+
+[project.urls]
+Homepage = "https://github.com/yakupbulbul/asp-vscode"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+asp_studio = ["static/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

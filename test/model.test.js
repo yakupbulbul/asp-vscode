@@ -25,3 +25,10 @@ test("trimResult limits models and names diagnostics", () => {
   assert.equal(r.models.length, 2);
   assert.equal(r.diagnostics[0].file, "encoding.lp");
 });
+
+test("the notebook engine view equals the extension view for a single file", () => {
+  const { animationFor } = require("../media/engine");
+  const text = "% c\nparent(a,b).\nparent(b,c).\nanc(X,Y) :- parent(X,Y).\nanc(X,Z) :- parent(X,Y), anc(Y,Z).\n";
+  assert.deepEqual(animationFor(text, "f.lp"), buildAnimation([{ name: "f.lp", text }]).view);
+  assert.deepEqual(animationFor("a.\nb :- not a.", "f.lp"), buildAnimation([{ name: "f.lp", text: "a.\nb :- not a." }]).view);
+});

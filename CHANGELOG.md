@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.2
+
+- New Python package `asp-studio` (folder `python/`): `%%asp` cell magic, `asp_studio.solve()/show()` and a command-line HTML report, using the same visualizer. The extension itself is unchanged apart from sharing code with it.
+
 ## 0.2.1
 
 - Answer Sets and Animator: atoms are grouped under a predicate header (colour, name/arity, count) and shown as compact chips with the predicate name in colour.

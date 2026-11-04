@@ -159,3 +159,10 @@ pre.out { margin: 0; padding: 10px 12px; white-space: pre-wrap; word-break: brea
 .diag .sev.error { color: var(--bad); } .diag .sev.warning { color: var(--warn); } .diag .sev.info { color: var(--accent); }
 .diag .where { color: var(--muted); font: 11.5px var(--mono); }
 .diag .msg { white-space: pre-wrap; }
+
+/* ---------- notebook output ---------- */
+.embed .top { position: static; }
+.embed main { padding: 12px 16px 16px; }
+.embed .rule { cursor: default; }
+html.embed-doc, html.embed-doc body { height: auto; }
+html.embed-doc { overflow: auto; }

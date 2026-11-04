@@ -169,5 +169,19 @@
     return rounds;
   }
 
-  return { AspError, parseProgram, evaluate, key, splitTop, isVar };
+  /** The animator view for one program text, as the visualizer expects it (also used by the notebook output). */
+  function animationFor(text, file) {
+    try {
+      const rules = parseProgram(text), rounds = evaluate(rules);
+      return {
+        rules: rules.map(r => ({ text: r.text, file, line: r.line + 1, fact: !r.body.length })),
+        rounds: rounds.map(rd => rd.map(f => ({ pred: f.atom.pred, args: f.atom.args, atom: key(f.atom), rule: f.rule, subst: f.subst }))),
+        incomplete: rules.incomplete || "",
+      };
+    } catch (e) {
+      return { error: String(e.message), file, line: e.line !== undefined ? e.line + 1 : null };
+    }
+  }
+
+  return { AspError, parseProgram, evaluate, key, splitTop, isVar, animationFor };
 });
