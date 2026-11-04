@@ -5,6 +5,7 @@ const path = require("path");
 const { solve, findClingo, resetClingoCache } = require("./solver");
 const { buildAnimation, trimResult } = require("./model");
 const { getHtml } = require("./panel");
+const { Environment } = require("./environment");
 
 const ASP_EXT = /\.(lp|asp|lpx)$/i;
 const isAspDoc = doc => !!doc && doc.uri.scheme !== "output" && (ASP_EXT.test(doc.fileName) || ["clingo", "asp", "lp"].includes(doc.languageId));
@@ -14,6 +15,7 @@ class Controller {
   constructor(context) {
     this.context = context;
     this.log = vscode.window.createOutputChannel("ASP Studio");
+    this.env = new Environment(context, this);
     this.diagnostics = vscode.languages.createDiagnosticCollection("asp");
     this.status = vscode.window.createStatusBarItem("asp.status", vscode.StatusBarAlignment.Left, 50);
     this.status.name = "ASP Studio";
@@ -105,7 +107,7 @@ class Controller {
 
     const result = await solve(sources, {
       models, extraArgs: c.get("options"), timeoutSeconds: c.get("timeoutSeconds"),
-      clingoPath: c.get("clingoPath"), preferWasm: c.get("preferWasm"), signal: abort.signal,
+      clingoPath: c.get("clingoPath"), managed: this.env.managed(), preferWasm: c.get("preferWasm"), signal: abort.signal,
     });
     if (my !== this.seq || result.cancelled) return;
     result.capped = capped;
@@ -195,7 +197,7 @@ class Controller {
       case "step": this.highlight(m); break;
       case "openSettings": vscode.commands.executeCommand("workbench.action.openSettings", "@ext:yakupbulbul.asp-studio"); break;
       case "copy": await vscode.env.clipboard.writeText(String(m.text || "")); vscode.window.setStatusBarMessage("ASP: copied", 1500); break;
-      case "pickClingo": vscode.commands.executeCommand("asp.selectClingo"); break;
+      case "setup": this.env.showSetup(); break;
     }
   }
 
@@ -254,7 +256,7 @@ class Controller {
     if (!picked || !picked[0]) return;
     await cfg().update("clingoPath", picked[0].fsPath, vscode.ConfigurationTarget.Global);
     resetClingoCache();
-    const found = await findClingo(picked[0].fsPath);
+    const found = await findClingo(picked[0].fsPath, this.env.managed());
     vscode.window.showInformationMessage(found ? `ASP Studio: using clingo ${found.version} at ${found.path}` : "ASP Studio: that file did not run as clingo; falling back to auto-detection.");
     if (this.target) this.run({});
   }

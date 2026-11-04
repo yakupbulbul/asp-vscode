@@ -138,7 +138,7 @@
       if (r.capped && r.more) meta += ` · auto-run limit ${r.capped}`;
     }
     const engine = r ? `<span class="chip" title="${esc(r.command)}">clingo ${esc(r.version)} · ${r.engine === "native" ? "native" : "WebAssembly"}</span>` +
-      (r.engine === "wasm" ? '<span class="chip link" id="pickClingo" title="Select a native clingo executable">use native</span>' : "") : "";
+      (r.engine === "wasm" ? '<span class="chip link" id="setupLink" title="Install a native clingo (faster than WebAssembly)">get native clingo</span>' : "") : "";
     const counts = { models: r && !r.error ? r.totalModels : 0, console: r ? r.diagnostics.length : 0 };
     $("app").innerHTML = `
       <div class="top">
@@ -153,7 +153,7 @@
       <main id="main"></main>`;
     $("solveBtn").onclick = () => vscode.postMessage({ type: "solve" });
     $("settingsBtn").onclick = () => vscode.postMessage({ type: "openSettings" });
-    const pc = $("pickClingo"); if (pc) pc.onclick = () => vscode.postMessage({ type: "pickClingo" });
+    const sl = $("setupLink"); if (sl) sl.onclick = () => vscode.postMessage({ type: "setup" });
     document.querySelectorAll(".tab").forEach(b => b.onclick = () => { ui.tab = b.dataset.tab; persist(); stopAnim(); renderShell(); renderMain(); });
   }
 

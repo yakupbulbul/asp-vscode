@@ -2,7 +2,7 @@
   "name": "asp-studio",
   "displayName": "ASP Studio",
   "description": "Run clingo, see answer sets and step through fixpoint rounds of Answer Set Programming code, with rules highlighted in the editor.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "publisher": "yakupbulbul",
   "license": "MIT",
   "private": true,
@@ -72,6 +72,22 @@
       {
         "command": "asp.showOutput",
         "title": "Show Output Log",
+        "category": "ASP"
+      },
+      {
+        "command": "asp.setupEnvironment",
+        "title": "Set Up Environment\u2026",
+        "category": "ASP",
+        "icon": "$(cloud-download)"
+      },
+      {
+        "command": "asp.removeEnvironment",
+        "title": "Remove Private Environment",
+        "category": "ASP"
+      },
+      {
+        "command": "asp.runViasp",
+        "title": "Open viASP for Current File",
         "category": "ASP"
       },
       {

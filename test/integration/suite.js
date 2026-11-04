@@ -18,8 +18,11 @@ async function run() {
   const ws = vscode.workspace.workspaceFolders[0].uri.fsPath;
 
   const cmds = await vscode.commands.getCommands(true);
-  for (const id of ["asp.openVisualizer", "asp.solve", "asp.stepForward", "asp.stepBack", "asp.togglePlay", "asp.resetAnimation", "asp.selectClingo"])
+  for (const id of ["asp.openVisualizer", "asp.solve", "asp.stepForward", "asp.stepBack", "asp.togglePlay", "asp.resetAnimation", "asp.selectClingo", "asp.setupEnvironment", "asp.removeEnvironment", "asp.runViasp"])
     assert.ok(cmds.includes(id), "command registered: " + id);
+
+  const env = await c.env.status();
+  assert.ok("native" in env && "highlighter" in env && "viasp" in env, "environment status has the expected shape");
 
   // --- solve a good file
   const good = await vscode.workspace.openTextDocument(path.join(ws, "ancestor.lp"));

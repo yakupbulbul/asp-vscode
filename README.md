@@ -28,6 +28,18 @@ ancestor(X,Z) :- parent(X,Y), ancestor(Y,Z).
 
 Open the **Animator** tab and press **Step**: round 0 holds the facts, round 1 adds the direct ancestors, rounds 2 and 3 add the longer chains, and the iteration stops when nothing new can be derived (the *fixpoint*).
 
+## Set up the tools
+
+Run **ASP: Set Up Environment…** (or click *get native clingo* in the visualizer). You choose what to install:
+
+| Component | What happens |
+|---|---|
+| Native clingo solver | `pip install clingo` into a private Python environment in the extension's storage, used automatically (`python -m clingo`). Needs Python 3.8+. |
+| Syntax highlighting | Installs the Marketplace extension `abelcour.asp-syntax-highlight`. |
+| viASP (optional) | `pip install viasp` into the same environment. Then **ASP: Open viASP for Current File** starts it. |
+
+Nothing is downloaded without your confirmation, and nothing outside the extension's storage is changed. **ASP: Remove Private Environment** deletes it again. Without any setup, the bundled WebAssembly clingo keeps working.
+
 ## Animator limits
 
 The Animator follows a *positive* program (facts and rules without `not`). It does not handle negation, choice rules `{ ... }`, constraints `:- ...` or ranges `1..n`. For those programs the Answer Sets and Graph tabs still work, and the Animator tells you which line is not supported.
@@ -40,6 +52,9 @@ The Animator follows a *positive* program (facts and rules without `not`). It do
 | ASP: Solve Current File | `⌘⌥Enter` · `Ctrl+Alt+Enter` |
 | ASP: Animator: Step Forward / Back | `Ctrl+Alt+→` / `Ctrl+Alt+←` |
 | ASP: Animator: Play / Pause | `Ctrl+Alt+Space` |
+| ASP: Set Up Environment… | |
+| ASP: Open viASP for Current File | |
+| ASP: Remove Private Environment | |
 | ASP: Select clingo Executable… | |
 | ASP: Show Output Log | |
 

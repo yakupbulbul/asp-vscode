@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.0
+
+- **ASP: Set Up Environment…** installs what ASP Studio can use: a native clingo (PyPI package in a private Python environment inside the extension's storage), a syntax highlighter extension, and optionally viASP.
+- **ASP: Open viASP for Current File** and **ASP: Remove Private Environment**.
+- One-time hint when only the built-in WebAssembly clingo is available.
+- The private environment is found automatically; no settings needed.
+
 ## 0.1.0
 
 - First release.

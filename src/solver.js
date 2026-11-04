@@ -8,37 +8,38 @@ const { parseDiagnostics } = require("./diagnostics");
 
 const WORKER = path.join(__dirname, "wasm-worker.js");
 
-/** Places where a clingo binary commonly lives; the first working one wins. */
-function candidatePaths(configured) {
+/** Places where clingo commonly lives. Each candidate is { cmd, prefix[] }; the first working one wins. */
+function candidates(configured, managed) {
   const home = os.homedir();
   const list = [];
-  if (configured && configured.trim()) list.push(configured.trim());
-  list.push("clingo");
+  if (configured && configured.trim()) list.push({ cmd: configured.trim(), prefix: [] });
+  if (managed) list.push({ cmd: managed.cmd, prefix: managed.args || [] });
+  list.push({ cmd: "clingo", prefix: [] });
   for (const base of ["anaconda3", "miniconda3", "miniforge3", "mambaforge", "opt/anaconda3"]) {
-    list.push(path.join(home, base, "envs", "asp-course", "bin", "clingo"));
-    list.push(path.join(home, base, "bin", "clingo"));
+    list.push({ cmd: path.join(home, base, "envs", "asp-course", "bin", "clingo"), prefix: [] });
+    list.push({ cmd: path.join(home, base, "bin", "clingo"), prefix: [] });
   }
-  list.push("/opt/homebrew/bin/clingo", "/usr/local/bin/clingo", "/usr/bin/clingo");
+  for (const p of ["/opt/homebrew/bin/clingo", "/usr/local/bin/clingo", "/usr/bin/clingo"]) list.push({ cmd: p, prefix: [] });
   return list;
 }
 
 const versionCache = new Map();
-/** Resolve a working native clingo. Returns `{ path, version }` or null. */
-async function findClingo(configured) {
-  const id = configured || "";
+/** Resolve a working native clingo. Returns { path, cmd, prefix, version } or null. `managed` = { cmd, args } of the private environment. */
+async function findClingo(configured, managed) {
+  const id = (configured || "") + "|" + (managed ? managed.cmd : "");
   if (versionCache.has(id)) return versionCache.get(id);
   let found = null;
-  for (const p of candidatePaths(configured)) {
-    if (p.includes(path.sep) && !fs.existsSync(p)) continue;
+  for (const c of candidates(configured, managed)) {
+    if (c.cmd.includes(path.sep) && !fs.existsSync(c.cmd)) continue;
     const version = await new Promise(resolve => {
       let out = "";
       let child;
-      try { child = cp.spawn(p, ["--version"]); } catch { return resolve(null); }
+      try { child = cp.spawn(c.cmd, [...c.prefix, "--version"]); } catch { return resolve(null); }
       child.stdout.on("data", d => out += d);
       child.on("error", () => resolve(null));
       child.on("close", code => resolve(code === 0 ? (out.match(/clingo version ([\d.]+)/) || [])[1] || "unknown" : null));
     });
-    if (version) { found = { path: p, version }; break; }
+    if (version) { found = { path: c.prefix.length ? c.cmd + " " + c.prefix.join(" ") : c.cmd, cmd: c.cmd, prefix: c.prefix, version }; break; }
   }
   versionCache.set(id, found);
   return found;
@@ -62,9 +63,9 @@ function parseResult(out) {
   };
 }
 
-function runNative(binary, program, args, timeoutMs, signal) {
+function runNative(found, program, args, timeoutMs, signal) {
   return new Promise(resolve => {
-    const child = cp.spawn(binary, args, { stdio: ["pipe", "pipe", "pipe"] });
+    const child = cp.spawn(found.cmd, [...found.prefix, ...args], { stdio: ["pipe", "pipe", "pipe"] });
     let out = "", err = "", timedOut = false, cancelled = false;
     const timer = setTimeout(() => { timedOut = true; child.kill("SIGKILL"); }, timeoutMs);
     const onAbort = () => { cancelled = true; child.kill("SIGKILL"); };
@@ -97,7 +98,7 @@ function runWasm(program, args, timeoutMs, signal) {
 
 /**
  * Solve the program made of `sources` ([{ text, ... }]).
- * options: { models, extraArgs[], timeoutMs, clingoPath, preferWasm, signal }
+ * options: { models, extraArgs[], timeoutSeconds, clingoPath, managed:{cmd,args}, preferWasm, signal }
  * Returns { engine, version, command, result, models, more, time, ms, stderr, diagnostics, error, timedOut, cancelled }.
  */
 async function solve(sources, options = {}) {
@@ -107,16 +108,16 @@ async function solve(sources, options = {}) {
   const program = joinSources(sources);
   const t0 = Date.now();
 
-  let engine = "wasm", version = "5.8.1", binary = null;
+  let engine = "wasm", version = "5.8.1", native = null;
   if (!options.preferWasm) {
-    const found = await findClingo(options.clingoPath);
-    if (found) { engine = "native"; version = found.version; binary = found.path; }
+    native = await findClingo(options.clingoPath, options.managed);
+    if (native) { engine = "native"; version = native.version; }
   }
 
   const args = ["--outf=2", String(models), ...extra];
-  const command = (engine === "native" ? path.basename(binary) : "clingo (wasm)") + " " + args.join(" ");
+  const command = (engine === "native" ? (native.prefix.length ? path.basename(native.cmd) + " " + native.prefix.join(" ") : path.basename(native.cmd)) : "clingo (wasm)") + " " + args.join(" ");
   const raw = engine === "native"
-    ? await runNative(binary, program, [...args, "-"], timeoutMs, options.signal)
+    ? await runNative(native, program, [...args, "-"], timeoutMs, options.signal)
     : await runWasm(program, args.join(" "), timeoutMs, options.signal);
 
   const r = { engine, version, command, ms: Date.now() - t0, stderr: raw.err || "", diagnostics: [], models: [] };

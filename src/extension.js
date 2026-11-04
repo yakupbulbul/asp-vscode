@@ -20,6 +20,9 @@ function activate(context) {
   reg("asp.resetAnimation", () => c.command("reset"));
   reg("asp.showOutput", () => c.log.show(true));
   reg("asp.selectClingo", () => c.selectClingo());
+  reg("asp.setupEnvironment", () => c.env.showSetup());
+  reg("asp.removeEnvironment", () => c.env.remove());
+  reg("asp.runViasp", () => c.env.runViasp());
   reg("asp.openSettings", () => vscode.commands.executeCommand("workbench.action.openSettings", "@ext:yakupbulbul.asp-studio"));
 
   context.subscriptions.push(
@@ -36,6 +39,9 @@ function activate(context) {
   );
 
   if (vscode.window.activeTextEditor) c.setTarget(vscode.window.activeTextEditor.document);
+  // offer the native toolchain once, but only when the user is actually working with ASP files
+  const offer = setTimeout(() => { if (c.target) c.env.suggestOnce(); }, 4000);
+  context.subscriptions.push({ dispose: () => clearTimeout(offer) });
   return { controller: c };                     // exposed for the integration tests
 }
 
