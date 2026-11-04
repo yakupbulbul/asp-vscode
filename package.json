@@ -1,0 +1,281 @@
+{
+  "name": "asp-studio",
+  "displayName": "ASP Studio",
+  "description": "Run clingo, see answer sets and step through fixpoint rounds of Answer Set Programming code, with rules highlighted in the editor.",
+  "version": "0.1.0",
+  "publisher": "yakupbulbul",
+  "license": "MIT",
+  "private": true,
+  "icon": "media/icon.png",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Visualization",
+    "Education"
+  ],
+  "keywords": [
+    "asp",
+    "answer set programming",
+    "clingo",
+    "logic programming",
+    "potassco",
+    "animation"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yakupbulbul/asp-vscode.git"
+  },
+  "main": "./src/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "asp.openVisualizer",
+        "title": "Open Visualizer",
+        "category": "ASP",
+        "icon": "$(graph)"
+      },
+      {
+        "command": "asp.solve",
+        "title": "Solve Current File",
+        "category": "ASP",
+        "icon": "$(play)"
+      },
+      {
+        "command": "asp.stepForward",
+        "title": "Animator: Step Forward",
+        "category": "ASP",
+        "icon": "$(debug-step-over)"
+      },
+      {
+        "command": "asp.stepBack",
+        "title": "Animator: Step Back",
+        "category": "ASP",
+        "icon": "$(debug-step-back)"
+      },
+      {
+        "command": "asp.togglePlay",
+        "title": "Animator: Play / Pause",
+        "category": "ASP",
+        "icon": "$(debug-continue)"
+      },
+      {
+        "command": "asp.resetAnimation",
+        "title": "Animator: Reset to Round 0",
+        "category": "ASP",
+        "icon": "$(debug-restart)"
+      },
+      {
+        "command": "asp.showOutput",
+        "title": "Show Output Log",
+        "category": "ASP"
+      },
+      {
+        "command": "asp.selectClingo",
+        "title": "Select clingo Executable\u2026",
+        "category": "ASP"
+      },
+      {
+        "command": "asp.openSettings",
+        "title": "Open Settings",
+        "category": "ASP",
+        "icon": "$(gear)"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "asp.openVisualizer",
+          "when": "resourceExtname =~ /^\\.(lp|asp|lpx)$/",
+          "group": "navigation@1"
+        },
+        {
+          "command": "asp.solve",
+          "when": "resourceExtname =~ /^\\.(lp|asp|lpx)$/",
+          "group": "navigation@2"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "asp.solve",
+          "when": "resourceExtname =~ /^\\.(lp|asp|lpx)$/",
+          "group": "asp@1"
+        },
+        {
+          "command": "asp.openVisualizer",
+          "when": "resourceExtname =~ /^\\.(lp|asp|lpx)$/",
+          "group": "asp@2"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "asp.stepForward",
+          "when": "asp.panelOpen"
+        },
+        {
+          "command": "asp.stepBack",
+          "when": "asp.panelOpen"
+        },
+        {
+          "command": "asp.togglePlay",
+          "when": "asp.panelOpen"
+        },
+        {
+          "command": "asp.resetAnimation",
+          "when": "asp.panelOpen"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "asp.solve",
+        "key": "ctrl+alt+enter",
+        "mac": "cmd+alt+enter",
+        "when": "resourceExtname =~ /^\\.(lp|asp|lpx)$/"
+      },
+      {
+        "command": "asp.stepForward",
+        "key": "ctrl+alt+right",
+        "when": "asp.panelOpen"
+      },
+      {
+        "command": "asp.stepBack",
+        "key": "ctrl+alt+left",
+        "when": "asp.panelOpen"
+      },
+      {
+        "command": "asp.togglePlay",
+        "key": "ctrl+alt+space",
+        "when": "asp.panelOpen"
+      }
+    ],
+    "configuration": {
+      "title": "ASP Studio",
+      "properties": {
+        "asp.clingoPath": {
+          "type": "string",
+          "default": "",
+          "scope": "machine-overridable",
+          "markdownDescription": "Path to the `clingo` executable. Leave empty to auto-detect (PATH, conda environments, Homebrew). If none is found the bundled WebAssembly build is used."
+        },
+        "asp.preferWasm": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Always use the bundled WebAssembly clingo instead of a native executable (slower, but identical everywhere)."
+        },
+        "asp.models": {
+          "type": "integer",
+          "default": 0,
+          "minimum": 0,
+          "markdownDescription": "Maximum number of answer sets to compute (`0` = all)."
+        },
+        "asp.options": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "markdownDescription": "Extra clingo command-line options, one per entry, e.g. `--opt-mode=optN` or `-c n=6`. Thread options (`-t`) are ignored by the WebAssembly build."
+        },
+        "asp.timeoutSeconds": {
+          "type": "number",
+          "default": 10,
+          "minimum": 1,
+          "maximum": 600,
+          "description": "Stop a computation after this many seconds."
+        },
+        "asp.scope": {
+          "type": "string",
+          "enum": [
+            "activeFile",
+            "folder"
+          ],
+          "default": "activeFile",
+          "enumDescriptions": [
+            "Solve only the active file.",
+            "Solve all .lp files in the active file's folder together (e.g. instance.lp + encoding.lp)."
+          ],
+          "description": "Which files make up the program."
+        },
+        "asp.autoRun": {
+          "type": "boolean",
+          "default": true,
+          "description": "While the visualizer is open, re-solve automatically after you stop typing."
+        },
+        "asp.autoRunDelay": {
+          "type": "integer",
+          "default": 500,
+          "minimum": 100,
+          "maximum": 5000,
+          "description": "Delay in milliseconds before auto-run starts."
+        },
+        "asp.autoRunMaxModels": {
+          "type": "integer",
+          "default": 50,
+          "minimum": 1,
+          "markdownDescription": "When `#asp.models#` is `0`, auto-run computes at most this many answer sets. The **Solve** command always computes all of them."
+        },
+        "asp.runOnSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "Check ASP files with clingo when they are saved and report errors in the Problems panel."
+        },
+        "asp.maxModelsShown": {
+          "type": "integer",
+          "default": 100,
+          "minimum": 1,
+          "maximum": 2000,
+          "description": "Maximum number of answer sets rendered in the visualizer."
+        },
+        "asp.animator.speed": {
+          "type": "integer",
+          "default": 1400,
+          "minimum": 200,
+          "maximum": 4000,
+          "description": "Milliseconds per round while the animator is playing."
+        },
+        "asp.animator.highlightRules": {
+          "type": "boolean",
+          "default": true,
+          "description": "Highlight the rules that fire in the current animator round in the editor."
+        }
+      }
+    },
+    "colors": [
+      {
+        "id": "asp.activeRuleBackground",
+        "description": "Editor background of rules that fire in the current animator round.",
+        "defaults": {
+          "dark": "#3794ff26",
+          "light": "#0066bf1f",
+          "highContrast": "#00000000",
+          "highContrastLight": "#00000000"
+        }
+      },
+      {
+        "id": "asp.activeRuleBorder",
+        "description": "Editor border of rules that fire in the current animator round.",
+        "defaults": {
+          "dark": "#3794ff",
+          "light": "#0066bf",
+          "highContrast": "#ffffff",
+          "highContrastLight": "#000000"
+        }
+      }
+    ]
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "package": "vsce package --no-dependencies",
+    "lint": "for f in src/*.js media/*.js scripts/*.js test/*.js test/integration/*.js; do node --check $f || exit 1; done",
+    "test:integration": "node test/integration/run.js"
+  },
+  "devDependencies": {
+    "@vscode/test-electron": "^2.5.2",
+    "@vscode/vsce": "^3.2.0"
+  }
+}
