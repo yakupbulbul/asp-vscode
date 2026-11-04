@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.1
+
+- Answer Sets and Animator: atoms are grouped under a predicate header (colour, name/arity, count) and shown as compact chips with the predicate name in colour.
+
 ## 0.2.0
 
 - **ASP: Set Up Environment…** installs what ASP Studio can use: a native clingo (PyPI package in a private Python environment inside the extension's storage), a syntax highlighter extension, and optionally viASP.

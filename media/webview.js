@@ -173,6 +173,18 @@
   }
   function bindErrorLink() { const l = $("toConsole"); if (l) l.onclick = e => { e.preventDefault(); ui.tab = "console"; persist(); renderShell(); renderMain(); }; }
 
+  /* ------------------------------------------------------------ shared atom rendering */
+  /** One atom as a chip: predicate name in the predicate colour, arguments muted. */
+  function atomChip(atom, color, { fresh = false, title = "" } = {}) {
+    const i = atom.indexOf("(");
+    const name = i < 0 ? atom : atom.slice(0, i), args = i < 0 ? "" : atom.slice(i);
+    return `<span class="atom-chip${fresh ? " fresh" : ""}" style="--pc:${color}"${title ? ` title="${esc(title)}"` : ""}><span class="an">${esc(name)}</span><span class="aa">${esc(args)}</span></span>`;
+  }
+  /** A predicate section: header (colour dot, name/arity, count) above wrapping chips. */
+  function predGroup(name, arity, color, chipsHtml, count) {
+    return `<div class="predgroup" style="--pc:${color}"><div class="pn"><span class="dot"></span><span class="pname">${esc(name)}</span><span class="parity">/${arity}</span><span class="pcount">${count}</span></div><div class="chips">${chipsHtml}</div></div>`;
+  }
+
   /* ------------------------------------------------------------ animator */
   function animSignature(a) { return a && !a.error ? a.rules.map(r => r.text).join("|") + "#" + a.rounds.map(x => x.length).join(",") : "x"; }
 
@@ -272,8 +284,8 @@
     let total = 0;
     $("aAtoms").innerHTML = Object.keys(groups).sort().map(p => {
       total += groups[p].length;
-      return `<div class="predgroup"><div class="pn"><span class="dot" style="background:${aColors[p] && aColors[p] !== "base" ? aColors[p] : predColor(p)}"></span>${esc(p)}/${groups[p][0].f.args.length} · ${groups[p].length}</div>` +
-        groups[p].map(({ f, k }) => `<span class="atom-chip ${k === aT && aT > 0 ? "fresh" : ""}" title="round ${k}">${esc(f.atom)}</span>`).join("") + `</div>`;
+      const color = aColors[p] && aColors[p] !== "base" ? aColors[p] : predColor(p);
+      return predGroup(p, groups[p][0].f.args.length, color, groups[p].map(({ f, k }) => atomChip(f.atom, color, { fresh: k === aT && aT > 0, title: "round " + k })).join(""), groups[p].length);
     }).join("");
     $("aCount").textContent = `· ${total}`;
 
@@ -307,7 +319,10 @@
   /* ------------------------------------------------------------ answer sets */
   function chipGroups(atoms) {
     const g = {}; atoms.forEach(a => (g[atomPred(a)] ||= []).push(a));
-    return Object.keys(g).sort().map(p => `<div class="predgroup"><div class="pn"><span class="dot" style="background:${predColor(p)}"></span>${esc(p)} · ${g[p].length}</div>${g[p].map(a => `<span class="atom-chip">${esc(a)}</span>`).join("")}</div>`).join("");
+    return Object.keys(g).sort().map(p => {
+      const color = predColor(p), arity = parseAtomStr(g[p][0]) ? parseAtomStr(g[p][0]).args.length : 0;
+      return predGroup(p, arity, color, g[p].map(a => atomChip(a, color)).join(""), g[p].length);
+    }).join("");
   }
 
   function viewModels() {
@@ -318,7 +333,7 @@
     main.innerHTML = `<div class="stack">
       ${r.capped && r.more ? `<div class="notice">Auto-run stopped at ${r.capped} models. Press <b>Solve</b> to compute all of them.</div>` : ""}
       ${r.models.map((m, i) => `<section class="card model ${i === ui.model ? "sel" : ""}" data-i="${i}">
-        <h3><span><b>Answer ${i + 1}</b> · ${plural(m.atoms.length, "atom")}${m.costs ? " · cost " + esc(m.costs.join(", ")) : ""}</span><button class="icon-btn" data-copy="${i}" title="Copy atoms" aria-label="Copy atoms">${ICON.copy}</button></h3>
+        <h3><span class="mh"><b>Answer ${i + 1}</b><span class="chip">${plural(m.atoms.length, "atom")}</span>${m.costs ? `<span class="chip" title="Optimisation cost">cost ${esc(m.costs.join(", "))}</span>` : ""}</span><button class="icon-btn" data-copy="${i}" title="Copy atoms" aria-label="Copy atoms">${ICON.copy}</button></h3>
         ${m.atoms.length ? chipGroups(m.atoms) : '<div class="pad muted">(empty answer set)</div>'}
       </section>`).join("")}
       ${r.totalModels > r.models.length ? `<div class="muted small">… ${r.totalModels - r.models.length} more not shown (setting <code>asp.maxModelsShown</code>).</div>` : ""}
