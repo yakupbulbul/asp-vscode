@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Documentation | ASP Studio</title>
+<meta name="description" content="How to use ASP Studio: commands, settings, setting up clingo, the Python API, the command line and troubleshooting.">
+<link rel="canonical" href="https://yakupbulbul.github.io/asp-vscode/docs.html">
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<meta property="og:title" content="ASP Studio documentation">
+<meta property="og:image" content="https://yakupbulbul.github.io/asp-vscode/assets/og.png">
+<script>try{var t=localStorage.getItem("asp-theme")||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="stylesheet" href="assets/site.css?v=3">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site">
+  <div class="wrap">
+    <a class="brand" href="./"><img src="assets/favicon.svg" alt="" width="28" height="28">ASP Studio</a>
+    <nav class="main" aria-label="Main">
+      <a href="./#demo" class="hide-sm">Demo</a>
+      <a href="./#install" class="hide-sm">Install</a>
+      <a href="docs.html" aria-current="page">Docs</a>
+      <a href="https://github.com/yakupbulbul/asp-vscode">GitHub</a>
+      <button class="icon-btn" id="theme-toggle" type="button" aria-label="Switch between light and dark theme">
+        <svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        <svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap docs">
+  <nav class="toc" aria-label="On this page">
+    <a href="#quick-start">Quick start</a>
+    <a href="#animator">The animator</a>
+    <a href="#commands">Commands and keys</a>
+    <a href="#settings">Settings</a>
+    <a href="#tools">Setting up tools</a>
+    <a href="#python">Python and notebooks</a>
+    <a href="#cli">Command line</a>
+    <a href="#troubleshooting">Troubleshooting</a>
+  </nav>
+
+  <main id="main">
+    <h1>Documentation</h1>
+    <p>Everything the extension and the Python package can do. If something here does not match what you see, <a href="https://github.com/yakupbulbul/asp-vscode/issues">open an issue</a>.</p>
+
+    <h2 id="quick-start">Quick start</h2>
+    <ol class="steps">
+      <li>Install the extension from the <a href="https://github.com/yakupbulbul/asp-vscode/releases/latest">latest release</a> (see the <a href="./#install">install steps</a>).</li>
+      <li>Open a <code>.lp</code> file. Click the graph icon in the editor title bar, or run <strong>ASP: Open Visualizer</strong> from the Command Palette. The panel opens beside your file.</li>
+      <li>Edit the program. With auto-run on, the panel updates when you stop typing. Press <strong>Solve</strong> to compute every answer set instead of the first few.</li>
+    </ol>
+    <p>The status bar shows the model count for the active file, and syntax errors appear in the Problems panel after each run.</p>
+
+    <h2 id="animator">The animator</h2>
+    <p>The animator evaluates a positive program the way a naive bottom-up evaluator would. Round 0 contains the facts. In every later round, each rule is applied to all atoms known so far, and the atoms that were not known before form the round. It stops at the fixpoint, when a round adds nothing.</p>
+    <p>For every new atom the panel shows which rule produced it and the variable bindings. While you step, the rules that fired are highlighted in the editor with a short note. Click a rule in the panel to jump to its line.</p>
+    <div class="note"><p>The animator rejects rules with <code>not</code>, choice rules, constraints and ranges such as <code>1..n</code>. The message names the offending line. The Answer Sets, Graph and Console tabs work for every program clingo accepts.</p></div>
+    <p>Inside the panel, <kbd>←</kbd> and <kbd>→</kbd> step, <kbd>Space</kbd> plays or pauses and <kbd>R</kbd> resets.</p>
+
+    <h2 id="commands">Commands and keys</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Command</th><th>What it does</th><th>Key</th></tr></thead>
+      <tbody>
+        <tr><td>ASP: Open Visualizer</td><td>Opens the panel for the active <code>.lp</code> file.</td><td>editor title icon</td></tr>
+        <tr><td>ASP: Solve Current File</td><td>Computes all answer sets.</td><td><kbd>Cmd</kbd> <kbd>Alt</kbd> <kbd>Enter</kbd> or <kbd>Ctrl</kbd> <kbd>Alt</kbd> <kbd>Enter</kbd></td></tr>
+        <tr><td>ASP: Animator: Step Forward / Back</td><td>Moves one round.</td><td><kbd>Ctrl</kbd> <kbd>Alt</kbd> <kbd>→</kbd> / <kbd>←</kbd></td></tr>
+        <tr><td>ASP: Animator: Play / Pause</td><td>Plays the rounds in sequence.</td><td><kbd>Ctrl</kbd> <kbd>Alt</kbd> <kbd>Space</kbd></td></tr>
+        <tr><td>ASP: Animator: Reset to Round 0</td><td>Goes back to the facts.</td><td></td></tr>
+        <tr><td>ASP: Set Up Environment…</td><td>Installs native clingo, a syntax highlighter and viASP. See <a href="#tools">below</a>.</td><td></td></tr>
+        <tr><td>ASP: Open viASP for Current File</td><td>Starts viASP on the file, installing it first if needed.</td><td></td></tr>
+        <tr><td>ASP: Select clingo Executable…</td><td>Points the extension at a specific clingo binary.</td><td></td></tr>
+        <tr><td>ASP: Remove Private Environment</td><td>Deletes the Python environment created by Set Up Environment.</td><td></td></tr>
+        <tr><td>ASP: Show Output Log</td><td>Shows the commands that ran and clingo's messages.</td><td></td></tr>
+      </tbody>
+    </table></div>
+
+    <h2 id="settings">Settings</h2>
+    <p>All settings start with <code>asp.</code> and are in Settings under ASP Studio.</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Setting</th><th>Default</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><code>clingoPath</code></td><td><code>""</code></td><td>Path to a native clingo. Empty means auto-detect (PATH, the private environment, conda, Homebrew), then fall back to WebAssembly.</td></tr>
+        <tr><td><code>preferWasm</code></td><td><code>false</code></td><td>Always use the bundled WebAssembly clingo.</td></tr>
+        <tr><td><code>models</code></td><td><code>0</code></td><td>Maximum number of answer sets. 0 means all.</td></tr>
+        <tr><td><code>options</code></td><td><code>[]</code></td><td>Extra clingo options, one per entry, for example <code>["--opt-mode=optN", "-c", "n=6"]</code>.</td></tr>
+        <tr><td><code>timeoutSeconds</code></td><td><code>10</code></td><td>Stops a computation after this many seconds.</td></tr>
+        <tr><td><code>scope</code></td><td><code>activeFile</code></td><td><code>folder</code> solves every <code>.lp</code> file in the folder together, for example <code>instance.lp</code> and <code>encoding.lp</code>.</td></tr>
+        <tr><td><code>autoRun</code>, <code>autoRunDelay</code></td><td><code>true</code>, <code>500</code></td><td>Re-solve while the panel is open, after a pause of this many milliseconds.</td></tr>
+        <tr><td><code>autoRunMaxModels</code></td><td><code>50</code></td><td>Model limit used by auto-run when <code>models</code> is 0.</td></tr>
+        <tr><td><code>runOnSave</code></td><td><code>true</code></td><td>Check <code>.lp</code> files on save and report problems.</td></tr>
+        <tr><td><code>maxModelsShown</code></td><td><code>100</code></td><td>Answer sets drawn in the panel.</td></tr>
+        <tr><td><code>animator.speed</code></td><td><code>1400</code></td><td>Milliseconds per round while playing.</td></tr>
+        <tr><td><code>animator.highlightRules</code></td><td><code>true</code></td><td>Highlight firing rules in the editor.</td></tr>
+      </tbody>
+    </table></div>
+    <p>The highlight colors are theme colors named <code>asp.activeRuleBackground</code> and <code>asp.activeRuleBorder</code>. Override them in <code>workbench.colorCustomizations</code>.</p>
+
+    <h2 id="tools">Setting up tools</h2>
+    <p>Run <strong>ASP: Set Up Environment…</strong> to see what is installed and pick what to add. Nothing downloads until you confirm.</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Component</th><th>What happens</th></tr></thead>
+      <tbody>
+        <tr><td>Native clingo</td><td>The PyPI package <code>clingo</code> is installed into a private virtual environment inside the extension's storage folder. It is picked up automatically and runs as <code>python -m clingo</code>. Needs Python 3.8 or newer.</td></tr>
+        <tr><td>Syntax highlighting</td><td>Installs the Marketplace extension <code>abelcour.asp-syntax-highlight</code>.</td></tr>
+        <tr><td>viASP</td><td>Installs the PyPI package <code>viasp</code> into the same environment. About 60 MB with its dependencies.</td></tr>
+      </tbody>
+    </table></div>
+    <p>Nothing outside the extension's storage folder is changed. <strong>ASP: Remove Private Environment</strong> deletes it. If only the WebAssembly clingo is available, the extension offers this setup once and stops asking if you choose "Don't ask again".</p>
+
+    <h2 id="python">Python and notebooks</h2>
+    <p>Install with <code>pip install "asp-studio[notebook]"</code>. It needs Python 3.9 or newer and the clingo Python package, which pip installs for you.</p>
+    <div class="code">
+      <div class="label"><span>python</span><button class="copy" type="button">Copy</button></div>
+<pre>import asp_studio as asp
+
+res = asp.solve("a :- not b. b :- not a.", models=0, timeout=10)
+res.result          # 'SATISFIABLE'
+list(res)           # [['b'], ['a']]
+res.diagnostics     # error and warning positions from clingo
+res                 # as the last line of a cell: shows the visualizer
+asp.show(res, tab="graph")</pre>
+    </div>
+    <p>&nbsp;</p>
+    <p><code>solve</code> takes ASP text, a <code>pathlib.Path</code> or a list of those. A broken program does not raise: check <code>res.ok</code> and <code>res.error</code>. With <code>#minimize</code> or <code>#maximize</code> and a finished search, only the optimal models are kept and their costs are in <code>res.costs</code>.</p>
+    <p>In a notebook, <code>%load_ext asp_studio</code> adds the <code>%%asp</code> cell magic:</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Option</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><code>-n 5</code></td><td>At most 5 answer sets. 0 means all.</td></tr>
+        <tr><td><code>-o "--opt-mode=optN -c n=6"</code></td><td>Extra clingo options.</td></tr>
+        <tr><td><code>-t 20</code></td><td>Timeout in seconds. Default 10.</td></tr>
+        <tr><td><code>--tab answers</code></td><td>First tab to show: <code>animator</code>, <code>answers</code>, <code>graph</code> or <code>console</code>.</td></tr>
+        <tr><td><code>--theme dark</code></td><td><code>auto</code>, <code>light</code> or <code>dark</code>. In VS Code notebooks the editor theme is used.</td></tr>
+        <tr><td><code>--out res</code></td><td>Keep the result in a variable called <code>res</code>.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h2 id="cli">Command line</h2>
+    <div class="code">
+      <div class="label"><span>shell</span><button class="copy" type="button">Copy</button></div>
+<pre>asp-studio program.lp --open                 # writes program.html and opens it
+asp-studio instance.lp encoding.lp -n 3      # several files are joined in order
+python -m asp_studio program.lp              # the same, without the script on PATH</pre>
+    </div>
+    <p>The exit code is 0 when the program ran, 1 when it has an error (positions are printed as <code>file:line:col</code>) and 2 for bad arguments or unreadable input.</p>
+
+    <h2 id="troubleshooting">Troubleshooting</h2>
+    <h3>The panel says "WebAssembly" and solving feels slow</h3>
+    <p>No native clingo was found. Run <strong>ASP: Set Up Environment…</strong> and tick the native solver, or set <code>asp.clingoPath</code>.</p>
+    <h3>The animator says it cannot show my program</h3>
+    <p>It names the first line it does not support. Remove <code>not</code>, choice rules, constraints or ranges from the part you want to animate. A small positive core of a larger program is a good thing to animate on its own.</p>
+    <h3>A notebook cell shows nothing</h3>
+    <p>Jupyter drops iframe output from notebooks it does not trust. Use File, then Trust Notebook, or run the cell again. In VS Code, make sure the kernel's environment has <code>asp-studio</code> installed.</p>
+    <h3>Setup says no Python was found</h3>
+    <p>Install Python 3.8 or newer from <a href="https://www.python.org/downloads/">python.org</a> and run the setup command again. The WebAssembly clingo keeps working in the meantime.</p>
+    <h3>Nothing happens on save</h3>
+    <p>Check that <code>asp.runOnSave</code> is on and that the file ends in <code>.lp</code>, <code>.asp</code> or <code>.lpx</code>. The Output panel, channel "ASP Studio", shows what ran.</p>
+  </main>
+</div>
+
+<footer class="site">
+  <div class="wrap">
+    <div>ASP Studio is MIT licensed. Made by <a href="https://github.com/yakupbulbul">yakupbulbul</a>.</div>
+    <nav aria-label="Footer">
+      <a href="./">Home</a>
+      <a href="https://github.com/yakupbulbul/asp-vscode">Source</a>
+      <a href="https://github.com/yakupbulbul/asp-vscode/releases">Releases</a>
+      <a href="https://github.com/yakupbulbul/asp-vscode/blob/main/CHANGELOG.md">Changelog</a>
+      <a href="https://github.com/yakupbulbul/asp-vscode/issues">Issues</a>
+    </nav>
+  </div>
+</footer>
+<script src="assets/site.js?v=3"></script>
+</body>
+</html>

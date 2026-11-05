@@ -3,6 +3,10 @@
 (function () {
   "use strict";
   const init = window.__ASP_INIT__ || {};
+  const query = new URLSearchParams(location.search);       // ?theme=dark&tab=graph overrides the defaults of a standalone page
+  if (query.get("theme")) init.theme = query.get("theme");
+  if (query.get("tab")) init.tab = query.get("tab");
+  if (query.get("round") !== null && /^\d+$/.test(query.get("round"))) window.__ASP_START_ROUND__ = +query.get("round");   // animator starts at this round
   window.__ASP_EMBED__ = true;
   const root = document.documentElement;
   root.classList.add("embed-doc");

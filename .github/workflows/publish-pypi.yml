@@ -1,0 +1,36 @@
+name: Publish to PyPI
+
+# Runs when a tag like python-v0.1.0 is pushed (or by hand from the Actions tab).
+# Publishing uses PyPI trusted publishing, so no token is stored in the repository.
+# One-time setup on pypi.org: add a (pending) trusted publisher for the project "asp-studio"
+#   owner: yakupbulbul   repository: asp-vscode   workflow: publish-pypi.yml   environment: pypi
+on:
+  push:
+    tags: ["python-v*"]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install build twine pytest ipython
+      - run: pip install -e python
+      - run: pytest python
+      - run: python -m build python
+      - run: twine check python/dist/*
+      - uses: actions/upload-artifact@v4
+        with: { name: dist, path: python/dist/ }
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { name: dist, path: dist/ }
+      - uses: pypa/gh-action-pypi-publish@release/v1

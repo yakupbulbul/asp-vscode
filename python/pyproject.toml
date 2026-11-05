@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "asp-studio"
 version = "0.1.0"
-description = "Answer Set Programming visualizer for Jupyter, VS Code notebooks and the command line: answer sets, graph and a step-by-step fixpoint animator."
+description = "Answer sets, a graph and a step-by-step animator for Answer Set Programming, in Jupyter, VS Code notebooks and the command line."
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.9"
@@ -29,7 +29,11 @@ test = ["pytest", "ipython"]
 asp-studio = "asp_studio.__main__:main"
 
 [project.urls]
-Homepage = "https://github.com/yakupbulbul/asp-vscode"
+Homepage = "https://yakupbulbul.github.io/asp-vscode/"
+Documentation = "https://yakupbulbul.github.io/asp-vscode/docs.html"
+Source = "https://github.com/yakupbulbul/asp-vscode"
+Issues = "https://github.com/yakupbulbul/asp-vscode/issues"
+Changelog = "https://github.com/yakupbulbul/asp-vscode/blob/main/CHANGELOG.md"
 
 [tool.setuptools.packages.find]
 where = ["src"]

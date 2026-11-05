@@ -204,7 +204,7 @@
       notifyStep(); return;
     }
     const sig = animSignature(a);
-    if (sig !== aSig) { aSig = sig; aT = a.rounds.length - 1; layoutAnim(); }
+    if (sig !== aSig) { aSig = sig; aT = Number.isInteger(window.__ASP_START_ROUND__) ? Math.max(0, Math.min(window.__ASP_START_ROUND__, a.rounds.length - 1)) : a.rounds.length - 1; layoutAnim(); }
     aT = Math.min(aT, a.rounds.length - 1);
     const last = a.rounds.length - 1;
     main.innerHTML = `<div class="stack">

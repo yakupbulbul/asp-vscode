@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ASP Studio: run clingo and watch answer set programs unfold</title>
+<meta name="description" content="A VS Code extension and Python package for Answer Set Programming. Solve with clingo, browse answer sets, and step through a program's derivation round by round with the active rules highlighted in your editor.">
+<link rel="canonical" href="https://yakupbulbul.github.io/asp-vscode/">
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="ASP Studio">
+<meta property="og:description" content="Run clingo, read the answer sets, and watch rules fire round by round. A VS Code extension and Python package.">
+<meta property="og:image" content="https://yakupbulbul.github.io/asp-vscode/assets/og.png">
+<meta property="og:url" content="https://yakupbulbul.github.io/asp-vscode/">
+<meta name="twitter:card" content="summary_large_image">
+<script>try{var t=localStorage.getItem("asp-theme")||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="stylesheet" href="assets/site.css?v=3">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"ASP Studio","applicationCategory":"DeveloperApplication","operatingSystem":"macOS, Windows, Linux","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"license":"https://opensource.org/licenses/MIT","url":"https://yakupbulbul.github.io/asp-vscode/","codeRepository":"https://github.com/yakupbulbul/asp-vscode"}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site">
+  <div class="wrap">
+    <a class="brand" href="./"><img src="assets/favicon.svg" alt="" width="28" height="28">ASP Studio</a>
+    <nav class="main" aria-label="Main">
+      <a href="#demo" class="hide-sm">Demo</a>
+      <a href="#install" class="hide-sm">Install</a>
+      <a href="docs.html">Docs</a>
+      <a href="https://github.com/yakupbulbul/asp-vscode">GitHub</a>
+      <button class="icon-btn" id="theme-toggle" type="button" aria-label="Switch between light and dark theme">
+        <svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        <svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section class="hero">
+    <div class="wrap">
+      <span class="eyebrow">VS Code extension and Python package</span>
+      <h1>See how your ASP program grows</h1>
+      <p class="lead">ASP Studio runs clingo on your <code>.lp</code> files and shows the answer sets. For recursive programs it also steps through the derivation one round at a time, and highlights the rules that fired right in your editor.</p>
+      <div class="cta">
+        <a class="btn primary" href="https://github.com/yakupbulbul/asp-vscode/releases/latest">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 20h16"/></svg>
+          Download for VS Code
+        </a>
+        <span class="install-line"><span>pip install asp-studio</span><button type="button" data-copy="pip install asp-studio">Copy</button></span>
+      </div>
+      <p class="fine">Free, MIT licensed, works on macOS, Windows and Linux. You do not need to install clingo to start.</p>
+    </div>
+  </section>
+
+  <section class="demo" id="demo">
+    <div class="wrap">
+      <div class="window">
+        <div class="bar">
+          <div class="dots" aria-hidden="true"><i></i><i></i><i></i></div>
+          <div class="demo-tabs" role="tablist" aria-label="Example programs">
+            <button type="button" role="tab" aria-selected="true" data-src="demo/ancestors.html?round=0" data-caption="The animator on a recursive program. It starts at the facts: press play, or step with the arrow keys. Each round shows the new atoms and the rule that derived them.">Ancestors</button>
+            <button type="button" role="tab" aria-selected="false" data-src="demo/coloring.html" data-caption="A graph coloring problem with 12 answer sets. Open the Graph tab to see one of them drawn.">Graph coloring</button>
+            <button type="button" role="tab" aria-selected="false" data-src="demo/knapsack.html" data-caption="An optimization problem. Only the optimal model is kept, and its cost is shown on the card.">Knapsack</button>
+          </div>
+        </div>
+        <iframe data-demo title="ASP Studio visualizer, interactive demo" loading="lazy"></iframe>
+      </div>
+      <p class="caption" id="demo-caption">The animator on a recursive program. It starts at the facts: press play, or step with the arrow keys. Each round shows the new atoms and the rule that derived them.</p>
+    </div>
+  </section>
+
+  <section class="block alt" id="features">
+    <div class="wrap">
+      <p class="kicker">What it does</p>
+      <h2>The parts of clingo you usually have to read from the terminal</h2>
+      <p class="section-lead">The extension covers the loop of writing a rule, running it and working out why the output looks the way it does.</p>
+      <div class="grid cols3">
+        <div class="card">
+          <div class="ico"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg></div>
+          <h3>Answer sets</h3>
+          <p>Each answer set is grouped by predicate. With <code>#minimize</code> or <code>#maximize</code> only the optimal models are kept, and the cost is on the card.</p>
+        </div>
+        <div class="card">
+          <div class="ico"><svg viewBox="0 0 24 24"><path d="M5 4l14 8-14 8z"/></svg></div>
+          <h3>Animator</h3>
+          <p>Follow the fixpoint of a positive program. Every round lists the atoms that are new, the rule behind each one and the variable bindings it used.</p>
+        </div>
+        <div class="card">
+          <div class="ico"><svg viewBox="0 0 24 24"><path d="M4 7h10M4 12h16M4 17h7"/><circle cx="18" cy="7" r="2"/></svg></div>
+          <h3>Highlighting in the editor</h3>
+          <p>While you step, the rules that fired are marked in your file with a note such as <code>round 2: +3 atoms</code>. Click a rule in the panel to jump to its line.</p>
+        </div>
+        <div class="card">
+          <div class="ico"><svg viewBox="0 0 24 24"><circle cx="6" cy="7" r="2.5"/><circle cx="18" cy="7" r="2.5"/><circle cx="12" cy="18" r="2.5"/><path d="M8.5 7h7M7.2 9.3l3.6 6.4M16.8 9.3l-3.6 6.4"/></svg></div>
+          <h3>Graph view</h3>
+          <p>Atoms with two arguments, like <code>edge(a,b)</code>, become arrows. Pick an answer set, hide a predicate, and drag nodes where you want them.</p>
+        </div>
+        <div class="card">
+          <div class="ico"><svg viewBox="0 0 24 24"><path d="M12 8v5M12 17h.01"/><path d="M10.3 3.9L2.4 17.6A2 2 0 0 0 4.1 20.6h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg></div>
+          <h3>Errors in the right place</h3>
+          <p>clingo's messages become squiggles and entries in the Problems panel. If the program spans several files, each message points at the file it came from.</p>
+        </div>
+        <div class="card">
+          <div class="ico"><svg viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 20h16"/></svg></div>
+          <h3>Works on a fresh machine</h3>
+          <p>If clingo is installed, ASP Studio uses it. If not, a bundled WebAssembly build of clingo 5.8 runs instead. One command can install the native one for you.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="notebooks">
+    <div class="wrap split">
+      <div>
+        <p class="kicker">Notebooks and Python</p>
+        <h2>The same panel in Jupyter</h2>
+        <p>Load the extension once, then start any cell with <code>%%asp</code>. The output is the visualizer you saw above, with the same four tabs.</p>
+        <p>From plain Python, <code>asp_studio.solve()</code> gives you the answer sets and the error positions. It does not raise on a broken program. From a terminal, <code>asp-studio program.lp</code> writes a standalone HTML report.</p>
+      </div>
+      <div class="code">
+        <div class="label"><span>notebook</span><button class="copy" type="button">Copy</button></div>
+<pre><span class="t-c">%load_ext asp_studio</span>
+
+<span class="t-c">%%asp --tab animator</span>
+<span class="t-p">parent</span>(anna,bob). <span class="t-p">parent</span>(bob,carl).
+<span class="t-p">ancestor</span>(<span class="t-v">X</span>,<span class="t-v">Y</span>) <span class="t-k">:-</span> <span class="t-p">parent</span>(<span class="t-v">X</span>,<span class="t-v">Y</span>).
+<span class="t-p">ancestor</span>(<span class="t-v">X</span>,<span class="t-v">Z</span>) <span class="t-k">:-</span> <span class="t-p">parent</span>(<span class="t-v">X</span>,<span class="t-v">Y</span>), <span class="t-p">ancestor</span>(<span class="t-v">Y</span>,<span class="t-v">Z</span>).</pre>
+      </div>
+    </div>
+  </section>
+
+  <section class="block alt" id="install">
+    <div class="wrap">
+      <p class="kicker">Install</p>
+      <h2>Pick the one you need</h2>
+      <p class="section-lead">The extension and the Python package share the same visualizer. You can use either on its own.</p>
+      <div class="grid cols2">
+        <div class="card">
+          <h3>VS Code extension</h3>
+          <ol class="steps">
+            <li>Download <code>asp-studio-0.2.2.vsix</code> from the <a href="https://github.com/yakupbulbul/asp-vscode/releases/latest">latest release</a>.</li>
+            <li>Run <code>code --install-extension asp-studio-0.2.2.vsix</code>, or use Extensions, then the <code>…</code> menu, then Install from VSIX.</li>
+            <li>Open a <code>.lp</code> file and click the graph icon in the editor title bar.</li>
+          </ol>
+          <p style="margin-top:12px">VS Code 1.85 or newer.</p>
+        </div>
+        <div class="card">
+          <h3>Python package</h3>
+          <div class="code" style="margin:6px 0 12px">
+            <div class="label"><span>shell</span><button class="copy" type="button">Copy</button></div>
+<pre>pip install "asp-studio[notebook]"</pre>
+          </div>
+          <p>Python 3.9 or newer. The <code>notebook</code> extra adds IPython for the <code>%%asp</code> magic. Without it you still get <code>solve()</code> and the command line.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="limits">
+    <div class="wrap split">
+      <div>
+        <p class="kicker">Good to know</p>
+        <h2>Where it stops</h2>
+      </div>
+      <ul class="plain">
+        <li>The animator only follows positive programs. Rules with <code>not</code>, choice rules, constraints and ranges like <code>1..n</code> are rejected, and the message names the line. Answer sets, the graph and error reporting still work for those programs.</li>
+        <li>The built-in WebAssembly clingo is single threaded and slower than a native one. Use <strong>ASP: Set Up Environment</strong> if you solve bigger instances.</li>
+        <li>Jupyter shows iframe output only in trusted notebooks.</li>
+        <li>This project is not affiliated with the Potassco team. clingo and clingo-wasm keep their own licenses, listed in the repository.</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <div>ASP Studio is MIT licensed. Made by <a href="https://github.com/yakupbulbul">yakupbulbul</a>.</div>
+    <nav aria-label="Footer">
+      <a href="docs.html">Documentation</a>
+      <a href="https://github.com/yakupbulbul/asp-vscode">Source</a>
+      <a href="https://github.com/yakupbulbul/asp-vscode/releases">Releases</a>
+      <a href="https://github.com/yakupbulbul/asp-vscode/blob/main/CHANGELOG.md">Changelog</a>
+      <a href="https://github.com/yakupbulbul/asp-vscode/issues">Issues</a>
+    </nav>
+  </div>
+</footer>
+<script src="assets/site.js?v=3"></script>
+</body>
+</html>

@@ -1,24 +1,45 @@
 # ASP Studio
 
-Run [clingo](https://potassco.org/clingo/), explore answer sets and watch how a logic program grows round by round, without leaving VS Code.
+ASP Studio runs [clingo](https://potassco.org/clingo/) on your Answer Set Programming files inside VS Code and shows what comes out: the answer sets, a graph of the atoms, and a step-by-step view of how a recursive program reaches its result. The same visualizer works in Jupyter notebooks through a Python package.
 
-ASP Studio is built for people learning and writing **Answer Set Programming** (`.lp` files). It pairs well with a syntax highlighter such as *Clingo for VSCode*.
+Website with a live demo: <https://yakupbulbul.github.io/asp-vscode/>
 
-## Features
+## What it does
 
-- **Solve on demand or while you type.** Answer sets, optimisation costs, timing and clingo's own messages appear next to your code.
-- **Problems panel integration.** Syntax errors and warnings from clingo are underlined in the editor.
-- **Animator.** Step through the fixpoint iteration of a positive program: which rule fired, with which variable bindings, and which atoms appeared in each round. The rules that fire in the current round are **highlighted in your editor**, with a note such as `← round 2: +3 atoms`. Click a rule in the visualizer to jump to its line.
-- **Graph view.** Binary atoms (`edge(a,b)`, `ancestor(X,Y)`) are drawn as a graph; unary atoms become labels. Switch between answer sets, hide predicates, drag nodes.
-- **Works out of the box.** A native `clingo` is used when found (PATH, conda, Homebrew). Otherwise a bundled WebAssembly build of clingo 5.8 runs inside the extension, so nothing has to be installed.
-- **Multi-file programs.** Optionally solve every `.lp` file in a folder together, for example `instance.lp` + `encoding.lp`.
-- **Theme-aware.** The visualizer uses your VS Code colours, in light, dark and high-contrast themes.
+- Solves the active `.lp` file with clingo, either while you type or on demand. Answer sets are grouped by predicate, and optimization costs show on the card.
+- Steps through the derivation of a positive program, one round at a time. Each round lists the new atoms, the rule that produced each one and its variable bindings.
+- Highlights the rules that fired in the current round in your editor, with a note like `← round 2: +3 atoms`. Clicking a rule in the panel jumps to its line.
+- Draws atoms with two arguments, such as `edge(a,b)`, as a graph. You can switch between answer sets, hide predicates and drag nodes.
+- Turns clingo's errors into editor squiggles and Problems entries. When a program spans several files, each message points at the file it came from.
+- Uses a native clingo if it finds one. Otherwise it runs a bundled WebAssembly build of clingo 5.8, so a fresh machine works without setup.
 
-## Quick start
+ASP Studio does not provide syntax highlighting. Any ASP highlighter extension works alongside it, and the setup command below can install one.
+
+## Install
+
+Download `asp-studio-<version>.vsix` from the [latest release](https://github.com/yakupbulbul/asp-vscode/releases/latest), then run
+
+```bash
+code --install-extension asp-studio-<version>.vsix
+```
+
+or open the Extensions view, choose **… → Install from VSIX…** and pick the file. It works on macOS, Windows and Linux and needs VS Code 1.85 or newer.
+
+To build it yourself:
+
+```bash
+git clone https://github.com/yakupbulbul/asp-vscode.git
+cd asp-vscode
+npm install
+npm run package
+code --install-extension asp-studio-*.vsix
+```
+
+## First steps
 
 1. Open a `.lp` file.
-2. Click the **graph** icon in the editor title bar, or run **ASP: Open Visualizer** from the Command Palette.
-3. Edit the program. The visualizer updates automatically. Press **Solve** (or `⌘⌥Enter` / `Ctrl+Alt+Enter`) to compute every answer set.
+2. Click the graph icon in the editor title bar, or run **ASP: Open Visualizer** from the Command Palette. The panel opens beside your file.
+3. Edit the program. The panel updates when you stop typing. Press **Solve** (`⌘⌥Enter`, or `Ctrl+Alt+Enter`) to compute every answer set.
 
 ```prolog
 parent(anna,bob). parent(bob,carl). parent(carl,eve).
@@ -26,26 +47,66 @@ ancestor(X,Y) :- parent(X,Y).
 ancestor(X,Z) :- parent(X,Y), ancestor(Y,Z).
 ```
 
-Open the **Animator** tab and press **Step**: round 0 holds the facts, round 1 adds the direct ancestors, rounds 2 and 3 add the longer chains, and the iteration stops when nothing new can be derived (the *fixpoint*).
+Open the Animator tab and press Step. Round 0 holds the facts, round 1 adds the direct ancestors, rounds 2 and 3 add the longer chains, and the iteration stops when nothing new can be derived. That last state is the fixpoint.
 
-## Set up the tools
+## Setting up tools
 
-Run **ASP: Set Up Environment…** (or click *get native clingo* in the visualizer). You choose what to install:
+Run **ASP: Set Up Environment…** to see what is installed and choose what to add. Nothing is downloaded until you confirm.
 
 | Component | What happens |
 |---|---|
-| Native clingo solver | `pip install clingo` into a private Python environment in the extension's storage, used automatically (`python -m clingo`). Needs Python 3.8+. |
+| Native clingo | `pip install clingo` into a private Python environment in the extension's storage folder. It is found automatically and runs as `python -m clingo`. Needs Python 3.8 or newer. |
 | Syntax highlighting | Installs the Marketplace extension `abelcour.asp-syntax-highlight`. |
-| viASP (optional) | `pip install viasp` into the same environment. Then **ASP: Open viASP for Current File** starts it. |
+| viASP | `pip install viasp` into the same environment, about 60 MB with its dependencies. **ASP: Open viASP for Current File** then starts it. |
 
-Nothing is downloaded without your confirmation, and nothing outside the extension's storage is changed. **ASP: Remove Private Environment** deletes it again. Without any setup, the bundled WebAssembly clingo keeps working.
+Nothing outside the extension's storage folder changes. **ASP: Remove Private Environment** deletes it again. If only the WebAssembly clingo is available, the extension offers this setup once.
+
+## Animator limits
+
+The animator follows positive programs: facts and rules without `not`. It rejects negation, choice rules `{ ... }`, constraints `:- ...` and ranges `1..n`, and the message names the line. For such programs the Answer Sets, Graph and Console tabs still work.
+
+## Commands and keys
+
+| Command | Default key |
+|---|---|
+| ASP: Open Visualizer | editor title icon |
+| ASP: Solve Current File | `⌘⌥Enter` or `Ctrl+Alt+Enter` |
+| ASP: Animator: Step Forward / Back | `Ctrl+Alt+→` / `Ctrl+Alt+←` |
+| ASP: Animator: Play / Pause | `Ctrl+Alt+Space` |
+| ASP: Animator: Reset to Round 0 | |
+| ASP: Set Up Environment… | |
+| ASP: Open viASP for Current File | |
+| ASP: Select clingo Executable… | |
+| ASP: Remove Private Environment | |
+| ASP: Show Output Log | |
+
+Inside the panel, `←` and `→` step, `Space` plays or pauses and `R` resets.
+
+## Settings
+
+| Setting | Default | Meaning |
+|---|---|---|
+| `asp.clingoPath` | `""` | Path to a native clingo. Empty means auto-detect, then WebAssembly. |
+| `asp.preferWasm` | `false` | Always use the bundled WebAssembly clingo. |
+| `asp.models` | `0` | Maximum number of answer sets (0 means all). |
+| `asp.options` | `[]` | Extra clingo options, for example `["--opt-mode=optN", "-c", "n=6"]`. |
+| `asp.timeoutSeconds` | `10` | Stops long computations. |
+| `asp.scope` | `activeFile` | `folder` solves all `.lp` files in the folder together. |
+| `asp.autoRun`, `asp.autoRunDelay` | `true`, `500` | Re-solve while the panel is open, after this many milliseconds of quiet. |
+| `asp.autoRunMaxModels` | `50` | Model limit for auto-run when `asp.models` is 0. |
+| `asp.runOnSave` | `true` | Check files on save and fill the Problems panel. |
+| `asp.maxModelsShown` | `100` | Answer sets drawn in the panel. |
+| `asp.animator.speed` | `1400` | Milliseconds per round while playing. |
+| `asp.animator.highlightRules` | `true` | Highlight firing rules in the editor. |
+
+The highlight colors are the theme colors `asp.activeRuleBackground` and `asp.activeRuleBorder`. Override them in `workbench.colorCustomizations`.
 
 ## Notebooks and Python
 
-The same visualizer works inside Jupyter and VS Code notebooks through the Python package in [`python/`](python/):
+The Python package in [`python/`](python/) gives you the same panel in Jupyter and VS Code notebooks:
 
 ```bash
-pip install -e "python[notebook]"      # from a clone of this repository
+pip install "asp-studio[notebook]"
 ```
 
 ```text
@@ -56,78 +117,21 @@ ancestor(X,Y) :- parent(X,Y).
 ancestor(X,Z) :- parent(X,Y), ancestor(Y,Z).
 ```
 
-It also offers `asp_studio.solve()`, `asp_studio.show()` and `asp-studio file.lp --open` (standalone HTML report). See [`python/README.md`](python/README.md) and `python/examples/demo.ipynb`.
-
-## Animator limits
-
-The Animator follows a *positive* program (facts and rules without `not`). It does not handle negation, choice rules `{ ... }`, constraints `:- ...` or ranges `1..n`. For those programs the Answer Sets and Graph tabs still work, and the Animator tells you which line is not supported.
-
-## Commands and keys
-
-| Command | Default key |
-|---|---|
-| ASP: Open Visualizer | editor title icon |
-| ASP: Solve Current File | `⌘⌥Enter` · `Ctrl+Alt+Enter` |
-| ASP: Animator: Step Forward / Back | `Ctrl+Alt+→` / `Ctrl+Alt+←` |
-| ASP: Animator: Play / Pause | `Ctrl+Alt+Space` |
-| ASP: Set Up Environment… | |
-| ASP: Open viASP for Current File | |
-| ASP: Remove Private Environment | |
-| ASP: Select clingo Executable… | |
-| ASP: Show Output Log | |
-
-Inside the visualizer: `←` `→` step, `Space` play or pause, `R` reset.
-
-## Settings
-
-| Setting | Default | Description |
-|---|---|---|
-| `asp.clingoPath` | `""` | Path to a native clingo. Empty = auto-detect, then WebAssembly. |
-| `asp.preferWasm` | `false` | Always use the bundled WebAssembly clingo. |
-| `asp.models` | `0` | Maximum answer sets (`0` = all). |
-| `asp.options` | `[]` | Extra clingo options, e.g. `["--opt-mode=optN", "-c", "n=6"]`. |
-| `asp.timeoutSeconds` | `10` | Stop long computations. |
-| `asp.scope` | `activeFile` | `folder` solves all `.lp` files of the folder together. |
-| `asp.autoRun` / `asp.autoRunDelay` | `true` / `500` | Re-solve while the visualizer is open. |
-| `asp.autoRunMaxModels` | `50` | Model cap for auto-run when `asp.models` is `0`. |
-| `asp.runOnSave` | `true` | Check files on save and fill the Problems panel. |
-| `asp.maxModelsShown` | `100` | Answer sets rendered in the visualizer. |
-| `asp.animator.speed` | `1400` | Milliseconds per round while playing. |
-| `asp.animator.highlightRules` | `true` | Highlight firing rules in the editor. |
-
-Theme colours `asp.activeRuleBackground` and `asp.activeRuleBorder` can be overridden in `workbench.colorCustomizations`.
-
-## Install
-
-Download `asp-studio-<version>.vsix` from the [latest release](https://github.com/yakupbulbul/asp-vscode/releases/latest), then either run
-
-```bash
-code --install-extension asp-studio-<version>.vsix
-```
-
-or open the Extensions view, choose **… → Install from VSIX…** and pick the file. Works on macOS, Windows and Linux; no other software is required (a WebAssembly clingo is bundled).
-
-## Install from source
-
-```bash
-git clone https://github.com/yakupbulbul/asp-vscode.git
-cd asp-vscode
-npm install
-npm run package          # creates asp-studio-<version>.vsix
-code --install-extension asp-studio-*.vsix
-```
+It also has `asp_studio.solve()`, `asp_studio.show()` and an `asp-studio program.lp --open` command that writes a standalone HTML report. See [`python/README.md`](python/README.md).
 
 ## Development
 
 ```bash
-npm test                 # unit tests (node:test); native-clingo tests are skipped if clingo is missing
-node scripts/preview.js  # renders the visualizer with real data in .preview/index.html (serve it and open in a browser)
+npm test                  # unit tests (node:test); the native-clingo tests skip if clingo is missing
+npm run test:integration  # starts a real VS Code (set VSCODE_EXECUTABLE to use an installed one)
+pytest python             # Python package tests
+node scripts/preview.js   # renders the panel with real data into .preview/index.html
 ```
 
 Press `F5` in VS Code to start an Extension Development Host.
 
-Layout: `python/` notebook/CLI package · `src/` extension host (solver wrapper, controller, helpers) · `media/` webview UI and the fixpoint engine · `vendor/` unmodified clingo-wasm 0.6.0 · `test/` unit tests.
+The code is split like this: `src/` is the extension host, `media/` holds the panel UI and the fixpoint engine, `python/` is the notebook and command-line package, `docs/` is the website and `vendor/` has the unmodified clingo-wasm 0.6.0 files. The panel files in `media/` are copied into `python/src/asp_studio/static` by `python/sync_static.py`, and a test fails if the copies drift apart.
 
-## Credits and licence
+## License
 
-MIT, see [LICENSE](LICENSE). Bundled third-party software (clingo, clingo-wasm) is listed in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md). This project is not affiliated with the Potassco team.
+MIT, see [LICENSE](LICENSE). The bundled clingo and clingo-wasm keep their own licenses, listed in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md). This project is not affiliated with the Potassco team.
