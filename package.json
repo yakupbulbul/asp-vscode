@@ -175,8 +175,8 @@
         "asp.clingoPath": {
           "type": "string",
           "default": "",
-          "scope": "machine-overridable",
-          "markdownDescription": "Path to the `clingo` executable. Leave empty to auto-detect (PATH, conda environments, Homebrew). If none is found the bundled WebAssembly build is used."
+          "scope": "machine",
+          "markdownDescription": "Path to the `clingo` executable. Leave empty to auto-detect (PATH, the private environment, conda, Homebrew). If none is found the bundled WebAssembly build is used. This setting is only read from your user or machine settings, never from a workspace, because it names a program that gets run."
         },
         "asp.preferWasm": {
           "type": "boolean",
@@ -297,5 +297,14 @@
   "homepage": "https://yakupbulbul.github.io/asp-vscode/",
   "bugs": {
     "url": "https://github.com/yakupbulbul/asp-vscode/issues"
+  },
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": "limited",
+      "restrictedConfigurations": [
+        "asp.options"
+      ],
+      "description": "In an untrusted workspace, clingo options set by the workspace are ignored. The solver itself still runs on your files."
+    }
   }
 }

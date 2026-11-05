@@ -163,7 +163,7 @@ It also has `asp_studio.solve()`, `asp_studio.show()` and an `asp-studio program
 
 **Can I use it with several files?** Yes. Set `asp.scope` to `folder` and the extension solves every `.lp` file in the folder together. In Python, `solve` takes a list of files.
 
-**How do I report a problem?** Open an [issue](https://github.com/yakupbulbul/asp-vscode/issues). The text of the Output panel (channel "ASP Studio") and your VS Code and clingo versions help.
+**How do I report a problem?** Open an [issue](https://github.com/yakupbulbul/asp-vscode/issues). The text of the Output panel (channel "ASP Studio") and your VS Code and clingo versions help. For a security problem, please use private reporting instead, see [SECURITY.md](SECURITY.md).
 
 ## Development
 

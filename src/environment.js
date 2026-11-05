@@ -115,9 +115,9 @@ class Environment {
       if (!fs.existsSync(bin)) return;
     }
     if (doc.isDirty) await doc.save();
-    const term = vscode.window.createTerminal({ name: "viASP" });
+    // Start the program directly instead of typing a command line into a shell: a file name with quotes or `$(...)` stays plain text.
+    const term = vscode.window.createTerminal({ name: "viASP", shellPath: bin, shellArgs: [doc.fileName] });
     term.show(true);
-    term.sendText(`"${bin}" "${doc.fileName}"`);
   }
 
   /* ------------------------------------------------------------------ first-run hint */
