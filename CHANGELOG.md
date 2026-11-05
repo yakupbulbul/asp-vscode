@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.6
+
+- Documentation: the commands table now lists **ASP: Open Settings**. The website background is calmer on small screens. No code changes.
+
 ## 0.2.5
 
 - Documentation: the README, SECURITY.md and the FAQ are rewritten in plain prose. No code changes.
