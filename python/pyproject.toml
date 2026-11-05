@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "asp-studio"
-version = "0.2.3"
+version = "0.2.4"
 description = "Answer sets, a graph and a step-by-step animator for Answer Set Programming, in Jupyter, VS Code notebooks and the command line."
 readme = "README.md"
 license = { text = "MIT" }

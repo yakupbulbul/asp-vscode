@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.2.4
 
 - Security: `asp.clingoPath` is now read only from user or machine settings, so a workspace cannot make the extension run a program of its choosing. In untrusted workspaces, workspace-level `asp.options` are ignored. **ASP: Open viASP for Current File** starts viASP directly instead of typing a command into a shell, so unusual file names cannot inject commands. See SECURITY.md.
 - Command line: `-o --opt-mode=optN` now works (values that start with a dash), `--version`, reading the program from standard input with `-`, and `--out` may be a directory. `solve()` accepts `(name, text)` pairs.
