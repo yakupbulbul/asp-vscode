@@ -42,14 +42,14 @@ Out of scope:
 
 ## How it is built
 
-These are design facts a reviewer can check in the source:
+Everything runs on your machine. The extension starts clingo locally, and the playground runs it in your browser as WebAssembly, in a worker that the page can stop. There is no server behind either one, no telemetry, and the website sets no cookies. The browser only remembers your last playground program and your theme choice, in local storage.
 
-- **Local by default.** The extension runs clingo on your machine. The playground runs clingo in your browser as WebAssembly. There is no server and no telemetry, and the website sets no cookies. The browser keeps your last program and theme in local storage.
-- **Network use is opt-in.** The only downloads are the packages and extension that **ASP: Set Up Environment…** installs, and only after you confirm. They come from PyPI and the VS Code Marketplace into a private Python environment inside the extension's storage folder.
-- **The program to run is not controlled by a workspace.** `asp.clingoPath` is read only from user and machine settings. In an untrusted workspace, workspace-level `asp.options` are ignored. Programs are started with an argument list, never through a shell. This applies from version 0.2.4. Earlier versions read `asp.clingoPath` from workspace settings, so please update.
-- **The panel is locked down.** The VS Code webview has a content security policy with script nonces and can only load files from the extension's `media` folder. Messages it sends back are limited to a short list of actions.
-- **Untrusted text is escaped.** Atom names and messages are escaped before they reach the page. The program text embedded in a generated report is encoded so it cannot end the script block. A test covers a `</script>` in a program.
-- **Notebook output is isolated.** The Python package renders the visualizer in an `<iframe>` whose content comes from the package, not from the program. Jupyter shows it only in trusted notebooks.
-- **Releases.** The Python package is published from GitHub Actions with PyPI trusted publishing, so no upload token exists in the repository. Extension builds are attached to GitHub releases. Third-party code is vendored unmodified and listed in `THIRD-PARTY-NOTICES.md`.
+The network is used in one place. If you run **ASP: Set Up Environment…** and confirm, the extension installs packages from PyPI into a private Python environment in its own storage folder, and asks VS Code to install a syntax highlighter from the Marketplace. Nothing else is downloaded.
 
-If you find that one of these statements is not true, that is a vulnerability and I want to know.
+A workspace cannot choose which program the extension runs. `asp.clingoPath` is read from your user and machine settings only, and in an untrusted workspace any `asp.options` the workspace sets are ignored. Processes are started with an argument list, never through a shell, which includes viASP. Version 0.2.4 is the first to work this way. Earlier versions read `asp.clingoPath` from workspace settings, so please update.
+
+The visualizer treats program text as hostile. Atom names and clingo messages are escaped before they reach the page, and the program text inside a generated report is encoded so it cannot close the script block (a test feeds it a `</script>`). The VS Code panel has a content security policy that allows only nonce-marked scripts and the extension's own `media` folder, and it can send back only a short list of messages. In notebooks the visualizer sits in an `<iframe>` whose code comes from the package, and Jupyter shows it only in trusted notebooks.
+
+The Python package is published from GitHub Actions with PyPI trusted publishing, so there is no upload token in the repository to steal. Extension builds are attached to GitHub releases. The vendored clingo and clingo-wasm files are unmodified and listed in `THIRD-PARTY-NOTICES.md`.
+
+If you find that any of this is not true, treat it as a vulnerability and tell me.

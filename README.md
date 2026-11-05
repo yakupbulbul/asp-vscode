@@ -155,15 +155,25 @@ It also has `asp_studio.solve()`, `asp_studio.show()` and an `asp-studio program
 
 ## Questions
 
-**Does my program leave my machine?** No. The extension runs clingo locally, and the playground runs it in your browser as WebAssembly. The only network use is the optional setup command, which downloads packages from PyPI and the Marketplace after you confirm.
+### Does my program leave my machine?
 
-**Which clingo does it use?** A native one if it finds one (your setting, the private environment, `PATH`, conda or Homebrew), otherwise the bundled WebAssembly build. The panel header shows which one answered.
+No. The extension runs clingo locally and the playground runs it in your browser as WebAssembly. The only network use is the optional setup command, and it downloads packages from PyPI and the Marketplace only after you confirm.
 
-**Why does the animator say it cannot show my program?** It only follows positive programs. The message names the first line it does not support. Answer Sets, Graph and Console work for every program clingo accepts.
+### Which clingo does it use?
 
-**Can I use it with several files?** Yes. Set `asp.scope` to `folder` and the extension solves every `.lp` file in the folder together. In Python, `solve` takes a list of files.
+A native one when it finds one: your setting first, then the private environment, `PATH`, conda and Homebrew. Otherwise the bundled WebAssembly build. The panel header says which one answered.
 
-**How do I report a problem?** Open an [issue](https://github.com/yakupbulbul/asp-vscode/issues). The text of the Output panel (channel "ASP Studio") and your VS Code and clingo versions help. For a security problem, please use private reporting instead, see [SECURITY.md](SECURITY.md).
+### Why does the animator say it cannot show my program?
+
+The animator only follows positive programs, and the message names the first line it does not support. Answer Sets, Graph and Console still work for anything clingo accepts.
+
+### Can I use several files?
+
+Yes. Set `asp.scope` to `folder` and the extension solves every `.lp` file in the folder together. In Python, `solve` takes a list of files.
+
+### How do I report a problem?
+
+Open an [issue](https://github.com/yakupbulbul/asp-vscode/issues). The Output panel (channel "ASP Studio") and your VS Code and clingo versions help a lot. For a security problem, use private reporting instead, described in [SECURITY.md](SECURITY.md).
 
 ## Development
 
