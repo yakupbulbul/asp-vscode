@@ -1,101 +1,50 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ASP Studio: ancestors.lp</title><style>/* Fallback theme for hosts that do not provide --vscode-* variables (Jupyter, browsers).
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ASP Studio: ancestors.lp</title><style>/* Fallback theme for hosts that do not provide --vscode-* variables (Jupyter, browsers). Black and white only.
    Inside VS Code the real variables are used instead. Choose with <html data-theme="light|dark">; default follows the OS. */
 :root, :root[data-theme="light"] {
-  --vscode-foreground:#3b3b3b;
-  --vscode-descriptionForeground:#717171;
-  --vscode-editor-background:#ffffff;
-  --vscode-editorWidget-background:#f8f8f8;
-  --vscode-widget-border:#c8c8c8;
-  --vscode-focusBorder:#005fb8;
-  --vscode-button-background:#005fb8;
-  --vscode-button-foreground:#fff;
-  --vscode-button-hoverBackground:#0258a8;
-  --vscode-button-secondaryBackground:#e5e5e5;
-  --vscode-button-secondaryForeground:#3b3b3b;
-  --vscode-badge-background:#cccccc;
-  --vscode-badge-foreground:#3b3b3b;
-  --vscode-charts-blue:#1a85ff;
-  --vscode-charts-orange:#d18616;
-  --vscode-charts-green:#388a34;
-  --vscode-charts-purple:#652d90;
-  --vscode-charts-red:#e51400;
-  --vscode-charts-yellow:#bf8803;
-  --vscode-testing-iconPassed:#388a34;
-  --vscode-testing-iconFailed:#f14c4c;
-  --vscode-editorWarning-foreground:#bf8803;
-  --vscode-dropdown-background:#fff;
-  --vscode-dropdown-foreground:#3b3b3b;
-  --vscode-dropdown-border:#cecece;
-  --vscode-font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-  --vscode-font-size:13px;
-  --vscode-editor-font-family:Menlo,Monaco,monospace;
-  --vscode-editor-font-size:12px;
+  --vscode-foreground: #1a1a1a;
+  --vscode-descriptionForeground: #5c5c5c;
+  --vscode-editor-background: #ffffff;
+  --vscode-editorWidget-background: #f7f7f7;
+  --vscode-widget-border: #e2e2e2;
+  --vscode-dropdown-background: #ffffff;
+  --vscode-dropdown-foreground: #1a1a1a;
+  --vscode-dropdown-border: #d4d4d4;
+  --vscode-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --vscode-font-size: 13px;
+  --vscode-editor-font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --vscode-editor-font-size: 12px;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --vscode-foreground:#cccccc;
-    --vscode-descriptionForeground:#9d9d9d;
-    --vscode-editor-background:#1f1f1f;
-    --vscode-editorWidget-background:#202020;
-    --vscode-widget-border:#2b2b2b;
-    --vscode-focusBorder:#0078d4;
-    --vscode-button-background:#0078d4;
-    --vscode-button-foreground:#fff;
-    --vscode-button-hoverBackground:#026ec1;
-    --vscode-button-secondaryBackground:#313131;
-    --vscode-button-secondaryForeground:#cccccc;
-    --vscode-badge-background:#616161;
-    --vscode-badge-foreground:#f8f8f8;
-    --vscode-charts-blue:#3794ff;
-    --vscode-charts-orange:#d18616;
-    --vscode-charts-green:#89d185;
-    --vscode-charts-purple:#b180d7;
-    --vscode-charts-red:#f14c4c;
-    --vscode-charts-yellow:#cca700;
-    --vscode-testing-iconPassed:#73c991;
-    --vscode-testing-iconFailed:#f14c4c;
-    --vscode-editorWarning-foreground:#cca700;
-    --vscode-dropdown-background:#313131;
-    --vscode-dropdown-foreground:#ccc;
-    --vscode-dropdown-border:#3c3c3c;
-    --vscode-font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-    --vscode-font-size:13px;
-    --vscode-editor-font-family:Menlo,Monaco,monospace;
-    --vscode-editor-font-size:12px;
+    --vscode-foreground: #e8e8e8;
+    --vscode-descriptionForeground: #a0a0a0;
+    --vscode-editor-background: #0a0a0a;
+    --vscode-editorWidget-background: #121212;
+    --vscode-widget-border: #272727;
+    --vscode-dropdown-background: #151515;
+    --vscode-dropdown-foreground: #e8e8e8;
+    --vscode-dropdown-border: #2f2f2f;
+    --vscode-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --vscode-font-size: 13px;
+    --vscode-editor-font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --vscode-editor-font-size: 12px;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --vscode-foreground:#cccccc;
-  --vscode-descriptionForeground:#9d9d9d;
-  --vscode-editor-background:#1f1f1f;
-  --vscode-editorWidget-background:#202020;
-  --vscode-widget-border:#2b2b2b;
-  --vscode-focusBorder:#0078d4;
-  --vscode-button-background:#0078d4;
-  --vscode-button-foreground:#fff;
-  --vscode-button-hoverBackground:#026ec1;
-  --vscode-button-secondaryBackground:#313131;
-  --vscode-button-secondaryForeground:#cccccc;
-  --vscode-badge-background:#616161;
-  --vscode-badge-foreground:#f8f8f8;
-  --vscode-charts-blue:#3794ff;
-  --vscode-charts-orange:#d18616;
-  --vscode-charts-green:#89d185;
-  --vscode-charts-purple:#b180d7;
-  --vscode-charts-red:#f14c4c;
-  --vscode-charts-yellow:#cca700;
-  --vscode-testing-iconPassed:#73c991;
-  --vscode-testing-iconFailed:#f14c4c;
-  --vscode-editorWarning-foreground:#cca700;
-  --vscode-dropdown-background:#313131;
-  --vscode-dropdown-foreground:#ccc;
-  --vscode-dropdown-border:#3c3c3c;
-  --vscode-font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-  --vscode-font-size:13px;
-  --vscode-editor-font-family:Menlo,Monaco,monospace;
-  --vscode-editor-font-size:12px;
+  --vscode-foreground: #e8e8e8;
+  --vscode-descriptionForeground: #a0a0a0;
+  --vscode-editor-background: #0a0a0a;
+  --vscode-editorWidget-background: #121212;
+  --vscode-widget-border: #272727;
+  --vscode-dropdown-background: #151515;
+  --vscode-dropdown-foreground: #e8e8e8;
+  --vscode-dropdown-border: #2f2f2f;
+  --vscode-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --vscode-font-size: 13px;
+  --vscode-editor-font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --vscode-editor-font-size: 12px;
   color-scheme: dark;
 }
 
@@ -106,27 +55,27 @@
   --card: var(--vscode-editorWidget-background, var(--vscode-sideBar-background, #252526));
   --soft: color-mix(in srgb, var(--fg) 7%, transparent);
   --border: var(--vscode-widget-border, var(--vscode-panel-border, color-mix(in srgb, var(--fg) 18%, transparent)));
-  --accent: var(--vscode-focusBorder, #3794ff);
-  --ok: var(--vscode-testing-iconPassed, #3fb950);
-  --bad: var(--vscode-testing-iconFailed, #f14c4c);
-  --warn: var(--vscode-editorWarning-foreground, #cca700);
-  --new: var(--vscode-charts-blue, #3794ff);
+  --accent: var(--fg);
+  --ok: color-mix(in srgb, var(--fg) 62%, var(--bg));
+  --bad: var(--fg);
+  --warn: color-mix(in srgb, var(--fg) 72%, var(--bg));
+  --new: var(--fg);
   --base: color-mix(in srgb, var(--fg) 40%, transparent);
   --mono: var(--vscode-editor-font-family, ui-monospace, Menlo, Consolas, monospace);
-  --c0: var(--vscode-charts-blue, #3794ff);
-  --c1: var(--vscode-charts-orange, #d18616);
-  --c2: var(--vscode-charts-green, #3fb950);
-  --c3: var(--vscode-charts-purple, #b180d7);
-  --c4: var(--vscode-charts-red, #f14c4c);
-  --c5: var(--vscode-charts-yellow, #cca700);
+  --c0: var(--fg);
+  --c1: color-mix(in srgb, var(--fg) 58%, var(--bg));
+  --c2: color-mix(in srgb, var(--fg) 80%, var(--bg));
+  --c3: color-mix(in srgb, var(--fg) 40%, var(--bg));
+  --c4: color-mix(in srgb, var(--fg) 68%, var(--bg));
+  --c5: color-mix(in srgb, var(--fg) 50%, var(--bg));
   --radius: 6px;
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; }
 body { font-family: var(--vscode-font-family, system-ui, sans-serif); font-size: var(--vscode-font-size, 13px); color: var(--fg); background: var(--bg); line-height: 1.45; }
 button, select, input { font: inherit; color: inherit; }
-a { color: var(--vscode-textLink-foreground, #3794ff); }
-a:hover { color: var(--vscode-textLink-activeForeground, #3794ff); }
+a { color: var(--fg); text-underline-offset: 2px; }
+a:hover { text-decoration-thickness: 2px; }
 code, pre, .mono { font-family: var(--mono); font-size: calc(var(--vscode-editor-font-size, 13px) - 0.5px); }
 :focus-visible { outline: 1px solid var(--accent); outline-offset: 1px; }
 
@@ -140,17 +89,18 @@ code, pre, .mono { font-family: var(--mono); font-size: calc(var(--vscode-editor
 .chip, .pill { display: inline-flex; align-items: center; gap: 5px; border-radius: 10px; padding: 1px 8px; font-size: 11.5px; line-height: 18px; white-space: nowrap; }
 .chip { background: var(--soft); color: var(--muted); }
 .chip.link { cursor: pointer; text-decoration: underline dotted; }
-.pill { font-weight: 600; color: #fff; background: var(--muted); }
-.pill.sat { background: color-mix(in srgb, var(--ok) 85%, #000); }
-.pill.unsat, .pill.err { background: color-mix(in srgb, var(--bad) 85%, #000); }
-.pill.unk, .pill.busy { background: color-mix(in srgb, var(--warn) 85%, #000); }
+.pill { font-weight: 600; color: var(--bg); background: var(--muted); }
+.pill.sat { background: var(--ok); }
+.pill.unsat { background: transparent; color: var(--fg); box-shadow: inset 0 0 0 1.5px var(--fg); }
+.pill.err { background: var(--fg); }
+.pill.unk, .pill.busy { background: color-mix(in srgb, var(--fg) 35%, var(--bg)); color: var(--fg); }
 .spacer { flex: 1; }
 
-.btn { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--vscode-button-border, transparent); border-radius: 3px; padding: 3px 11px; cursor: pointer;
-       background: var(--vscode-button-secondaryBackground, var(--soft)); color: var(--vscode-button-secondaryForeground, var(--fg)); }
-.btn:hover:not(:disabled) { background: var(--vscode-button-secondaryHoverBackground, var(--soft)); }
-.btn.primary { background: var(--vscode-button-background, var(--accent)); color: var(--vscode-button-foreground, #fff); }
-.btn.primary:hover:not(:disabled) { background: var(--vscode-button-hoverBackground, var(--accent)); }
+.btn { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--border); border-radius: 3px; padding: 3px 11px; cursor: pointer;
+       background: var(--soft); color: var(--fg); }
+.btn:hover:not(:disabled) { background: color-mix(in srgb, var(--fg) 14%, transparent); }
+.btn.primary { background: var(--fg); border-color: var(--fg); color: var(--bg); }
+.btn.primary:hover:not(:disabled) { background: color-mix(in srgb, var(--fg) 85%, var(--bg)); }
 .btn:disabled { opacity: .45; cursor: default; }
 .icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border: 0; border-radius: 4px; background: transparent; cursor: pointer; color: var(--fg); }
 .icon-btn:hover:not(:disabled) { background: var(--vscode-toolbar-hoverBackground, var(--soft)); }
@@ -163,7 +113,7 @@ svg.i { width: 16px; height: 16px; fill: currentColor; flex: none; }
 .tab { border: 0; background: transparent; padding: 7px 12px; cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent; white-space: nowrap; display: inline-flex; gap: 6px; align-items: center; }
 .tab:hover { color: var(--fg); }
 .tab[aria-selected=true] { color: var(--fg); border-bottom-color: var(--accent); }
-.count { background: var(--vscode-badge-background, var(--soft)); color: var(--vscode-badge-foreground, var(--fg)); border-radius: 9px; padding: 0 6px; font-size: 11px; line-height: 16px; }
+.count { background: color-mix(in srgb, var(--fg) 18%, transparent); color: var(--fg); border-radius: 9px; padding: 0 6px; font-size: 11px; line-height: 16px; }
 
 /* ---------- content ---------- */
 main { padding: 16px; flex: 1; }
@@ -190,8 +140,8 @@ main { padding: 16px; flex: 1; }
 .ticks span.cur { color: var(--fg); font-weight: 600; }
 .transport select { background: var(--vscode-dropdown-background, var(--card)); color: var(--vscode-dropdown-foreground, var(--fg)); border: 1px solid var(--vscode-dropdown-border, var(--border)); border-radius: 3px; padding: 2px 4px; }
 .status-line { display: flex; align-items: center; gap: 8px; padding: 10px 12px; font-weight: 600; flex-wrap: wrap; }
-.tag { font-size: 11px; font-weight: 600; background: var(--new); color: #fff; border-radius: 9px; padding: 0 8px; line-height: 18px; }
-.tag.done { background: color-mix(in srgb, var(--ok) 85%, #000); }
+.tag { font-size: 11px; font-weight: 600; background: var(--fg); color: var(--bg); border-radius: 9px; padding: 0 8px; line-height: 18px; }
+.tag.done { background: var(--ok); }
 .fix { color: var(--ok); font-weight: 500; }
 
 /* ---------- rules list ---------- */
@@ -216,7 +166,7 @@ main { padding: 16px; flex: 1; }
 .predgroup .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--pc); flex: none; }
 .predgroup .pname { font: 600 12px var(--mono); color: var(--fg); }
 .predgroup .parity { font: 12px var(--mono); color: var(--muted); margin-left: -4px; }
-.predgroup .pcount { margin-left: 4px; background: var(--vscode-badge-background, var(--soft)); color: var(--vscode-badge-foreground, var(--fg)); border-radius: 9px; padding: 0 7px; font-size: 11px; line-height: 16px; }
+.predgroup .pcount { margin-left: 4px; background: color-mix(in srgb, var(--fg) 18%, transparent); color: var(--fg); border-radius: 9px; padding: 0 7px; font-size: 11px; line-height: 16px; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
 .atom-chip { display: inline-flex; align-items: baseline; font: 12px/20px var(--mono); border: 1px solid color-mix(in srgb, var(--pc, var(--accent)) 38%, transparent);
@@ -267,7 +217,7 @@ pre.out { margin: 0; padding: 10px 12px; white-space: pre-wrap; word-break: brea
 .embed .rule { cursor: default; }
 html.embed-doc, html.embed-doc body { height: auto; }
 html.embed-doc { overflow: auto; }
-</style></head><body><div id="app"></div><script>window.__ASP_INIT__ = {"state": {"engine": "python", "version": "5.8.1", "command": "clingo.Control(['0'])", "result": "SATISFIABLE", "models": [{"atoms": ["parent(anna,bob)", "parent(bob,carl)", "parent(bob,dana)", "parent(carl,eve)", "ancestor(anna,bob)", "ancestor(bob,carl)", "ancestor(bob,dana)", "ancestor(carl,eve)", "ancestor(bob,eve)", "ancestor(anna,dana)", "ancestor(anna,carl)", "ancestor(anna,eve)"], "costs": null}], "totalModels": 1, "more": false, "ms": 8, "time": 0.006057024002075195, "stderr": "", "capped": 0, "diagnostics": []}, "program": "% parent(X,Y): X is a parent of Y\nparent(anna,bob).\nparent(bob,carl). parent(bob,dana).\nparent(carl,eve).\n\nancestor(X,Y) :- parent(X,Y).\nancestor(X,Z) :- parent(X,Y), ancestor(Y,Z).\n\n", "tab": "animator", "theme": "auto", "maxHeight": 640, "title": "ancestors.lp"};</script><script>/* Fixpoint engine for positive ASP programs: parser (with source positions) and
+</style></head><body><div id="app"></div><script>window.__ASP_INIT__ = {"state": {"engine": "python", "version": "5.8.1", "command": "clingo.Control(['0'])", "result": "SATISFIABLE", "models": [{"atoms": ["parent(anna,bob)", "parent(bob,carl)", "parent(bob,dana)", "parent(carl,eve)", "ancestor(anna,bob)", "ancestor(bob,carl)", "ancestor(bob,dana)", "ancestor(carl,eve)", "ancestor(bob,eve)", "ancestor(anna,dana)", "ancestor(anna,carl)", "ancestor(anna,eve)"], "costs": null}], "totalModels": 1, "more": false, "ms": 12, "time": 0.008452892303466797, "stderr": "", "capped": 0, "diagnostics": []}, "program": "% parent(X,Y): X is a parent of Y\nparent(anna,bob).\nparent(bob,carl). parent(bob,dana).\nparent(carl,eve).\n\nancestor(X,Y) :- parent(X,Y).\nancestor(X,Z) :- parent(X,Y), ancestor(Y,Z).\n\n", "tab": "animator", "theme": "auto", "maxHeight": 640, "title": "ancestors.lp"};</script><script>/* Fixpoint engine for positive ASP programs: parser (with source positions) and
  * naive bottom-up evaluation, round by round. Runs in Node and in the webview. */
 (function (root, factory) {
   const api = factory();

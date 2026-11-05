@@ -2,7 +2,7 @@
   "name": "asp-studio",
   "displayName": "ASP Studio",
   "description": "Run clingo on ASP files, browse answer sets and step through a program's derivation round by round, with the rules that fire highlighted in the editor.",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "publisher": "yakupbulbul",
   "license": "MIT",
   "private": true,
@@ -266,8 +266,8 @@
         "id": "asp.activeRuleBackground",
         "description": "Editor background of rules that fire in the current animator round.",
         "defaults": {
-          "dark": "#3794ff26",
-          "light": "#0066bf1f",
+          "dark": "#ffffff1f",
+          "light": "#0000001a",
           "highContrast": "#00000000",
           "highContrastLight": "#00000000"
         }
@@ -276,8 +276,8 @@
         "id": "asp.activeRuleBorder",
         "description": "Editor border of rules that fire in the current animator round.",
         "defaults": {
-          "dark": "#3794ff",
-          "light": "#0066bf",
+          "dark": "#d4d4d4",
+          "light": "#333333",
           "highContrast": "#ffffff",
           "highContrastLight": "#000000"
         }

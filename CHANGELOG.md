@@ -1,13 +1,14 @@
 # Changelog
 
-## Unreleased
+## 0.2.3
 
-- New pixel-art logo for the extension icon, the website favicon and the site header.
-- The Python package `asp-studio` now uses the same version number as the extension. Version 0.2.2 is the first release after 0.1.0 and has no code changes beyond the version.
+- New pixel-art logo for the extension icon.
+- The visualizer panel now uses black, white and shades of gray, matching the website. Text, background and borders still follow your VS Code theme. Predicates are told apart by shade instead of hue.
+- The editor highlight colors `asp.activeRuleBackground` and `asp.activeRuleBorder` are gray by default.
 
 ## 0.2.2
 
-- New Python package `asp-studio` (folder `python/`): `%%asp` cell magic, `asp_studio.solve()/show()` and a command-line HTML report, using the same visualizer. The extension itself is unchanged apart from sharing code with it.
+- New Python package `asp-studio` (folder `python/`): `%%asp` cell magic, `asp_studio.solve()/show()` and a command-line HTML report, using the same visualizer. The extension itself is unchanged apart from sharing code with it. From this release the Python package uses the same version number as the extension.
 
 ## 0.2.1
 
