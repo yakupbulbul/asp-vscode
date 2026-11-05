@@ -29,3 +29,10 @@ def test_cell_magic_reports_errors_inside_the_visualizer(ip):
 def test_bad_arguments_print_usage(ip, capsys):
     ip.run_cell_magic("asp", "--no-such-flag", "a.")
     assert "%%asp" in capsys.readouterr().out
+
+
+def test_magic_option_value_may_start_with_dashes(ip):
+    with capture_output() as cap:
+        ip.run_cell_magic("asp", '-o "--opt-mode=optN" --out opt', "{a}.\n#minimize { 1,a : a }.")
+    assert "<iframe" in cap.outputs[0].data["text/html"]
+    assert ip.user_ns["opt"].ok

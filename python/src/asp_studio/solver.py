@@ -9,7 +9,7 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple, Union
 
 import clingo
 
-Program = Union[str, Path]
+Program = Union[str, Path, Tuple[str, str]]
 
 _DIAG = re.compile(
     r"^(?:<block>|<string>|-):(\d+):(\d+)(?:-(\d+))?(?::(\d+)(?:-(\d+))?)?: (error|warning|info): (.*)$"
@@ -103,13 +103,18 @@ class Result:
 
 def _read(programs: Union[Program, Sequence[Program]]) -> Tuple[str, List[Tuple[str, int]]]:
     """Join the programs; also return (name, line count) per part so messages can be mapped back to their file."""
-    items: Iterable[Program] = [programs] if isinstance(programs, (str, Path)) else programs
+    items: Iterable[Program] = [programs] if isinstance(programs, (str, Path, tuple)) else programs
     parts: List[str] = []
     sources: List[Tuple[str, int]] = []
     for p in items:
-        text = p.read_text(encoding="utf-8") if isinstance(p, Path) else p
+        if isinstance(p, tuple):                                  # (name, text)
+            name, text = p
+        elif isinstance(p, Path):
+            name, text = p.name, p.read_text(encoding="utf-8")
+        else:
+            name, text = "program", p
         parts.append(text)
-        sources.append((p.name if isinstance(p, Path) else "program", len(text.split("\n"))))
+        sources.append((name, len(text.split("\n"))))
     return "\n".join(parts) + "\n", sources
 
 
@@ -152,7 +157,7 @@ def solve(
 ) -> Result:
     """Solve ``program`` and return a :class:`Result`.
 
-    ``program`` is ASP text, a :class:`pathlib.Path`, or a list of those (joined in order).
+    ``program`` is ASP text, a :class:`pathlib.Path`, a ``(name, text)`` pair, or a list of those (joined in order).
     ``models`` limits the number of answer sets (0 = all). ``options`` are extra clingo options,
     either a list or one string such as ``"--opt-mode=optN -c n=6"``. ``timeout`` is in seconds.
     With optimisation statements and a finished search only the optimal models are kept.

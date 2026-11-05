@@ -1,10 +1,42 @@
 # ASP Studio
 
-ASP Studio runs [clingo](https://potassco.org/clingo/) on your Answer Set Programming files inside VS Code and shows what comes out: the answer sets, a graph of the atoms, and a step-by-step view of how a recursive program reaches its result. The same visualizer works in Jupyter notebooks through a Python package.
+[![PyPI](https://img.shields.io/pypi/v/asp-studio?color=0a0a0a)](https://pypi.org/project/asp-studio/)
+[![Python](https://img.shields.io/pypi/pyversions/asp-studio?color=0a0a0a)](https://pypi.org/project/asp-studio/)
+[![CI](https://github.com/yakupbulbul/asp-vscode/actions/workflows/ci.yml/badge.svg)](https://github.com/yakupbulbul/asp-vscode/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-0a0a0a)](LICENSE)
 
-Website with a live demo: <https://yakupbulbul.github.io/asp-vscode/>
+ASP Studio runs [clingo](https://potassco.org/clingo/) on your Answer Set Programming files and shows what comes out: the answer sets, a graph of the atoms, and a step-by-step view of how a recursive program reaches its result. It is a VS Code extension, a Python package for notebooks and the command line, and a playground that runs in the browser.
 
-To try it without installing anything, use the [online playground](https://yakupbulbul.github.io/asp-vscode/playground.html). clingo runs in your browser as WebAssembly and your program is never uploaded.
+[Playground](https://yakupbulbul.github.io/asp-vscode/playground.html) · [Website](https://yakupbulbul.github.io/asp-vscode/) · [Documentation](https://yakupbulbul.github.io/asp-vscode/docs.html) · [Releases](https://github.com/yakupbulbul/asp-vscode/releases) · [PyPI](https://pypi.org/project/asp-studio/)
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/screenshot-dark.png">
+    <img src="docs/assets/screenshot-light.png" alt="The ASP Studio playground: an ancestor program on the left, the animator with its rules, graph and derived atoms on the right" width="900">
+  </picture>
+</p>
+
+## Contents
+
+- [Ways to use it](#ways-to-use-it)
+- [What it does](#what-it-does)
+- [Install the VS Code extension](#install-the-vs-code-extension)
+- [First steps](#first-steps)
+- [Setting up tools](#setting-up-tools)
+- [Animator limits](#animator-limits)
+- [Commands, keys and settings](#commands-and-keys)
+- [Notebooks and Python](#notebooks-and-python)
+- [Questions](#questions)
+- [Development](#development)
+
+## Ways to use it
+
+| You want to | Use |
+|---|---|
+| Try it without installing anything | the [playground](https://yakupbulbul.github.io/asp-vscode/playground.html) |
+| Work on `.lp` files in an editor | the VS Code extension, from the [latest release](https://github.com/yakupbulbul/asp-vscode/releases/latest) |
+| Use it in Jupyter or a VS Code notebook | `pip install "asp-studio[notebook]"` |
+| Get a report from a script or CI job | `asp-studio program.lp`, which writes a standalone HTML file |
 
 ## What it does
 
@@ -17,7 +49,7 @@ To try it without installing anything, use the [online playground](https://yakup
 
 ASP Studio does not provide syntax highlighting. Any ASP highlighter extension works alongside it, and the setup command below can install one.
 
-## Install
+## Install the VS Code extension
 
 Download `asp-studio-<version>.vsix` from the [latest release](https://github.com/yakupbulbul/asp-vscode/releases/latest), then run
 
@@ -84,7 +116,7 @@ The animator follows positive programs: facts and rules without `not`. It reject
 
 Inside the panel, `←` and `→` step, `Space` plays or pauses and `R` resets.
 
-## Settings
+### Settings
 
 | Setting | Default | Meaning |
 |---|---|---|
@@ -121,6 +153,18 @@ ancestor(X,Z) :- parent(X,Y), ancestor(Y,Z).
 
 It also has `asp_studio.solve()`, `asp_studio.show()` and an `asp-studio program.lp --open` command that writes a standalone HTML report. See [`python/README.md`](python/README.md).
 
+## Questions
+
+**Does my program leave my machine?** No. The extension runs clingo locally, and the playground runs it in your browser as WebAssembly. The only network use is the optional setup command, which downloads packages from PyPI and the Marketplace after you confirm.
+
+**Which clingo does it use?** A native one if it finds one (your setting, the private environment, `PATH`, conda or Homebrew), otherwise the bundled WebAssembly build. The panel header shows which one answered.
+
+**Why does the animator say it cannot show my program?** It only follows positive programs. The message names the first line it does not support. Answer Sets, Graph and Console work for every program clingo accepts.
+
+**Can I use it with several files?** Yes. Set `asp.scope` to `folder` and the extension solves every `.lp` file in the folder together. In Python, `solve` takes a list of files.
+
+**How do I report a problem?** Open an [issue](https://github.com/yakupbulbul/asp-vscode/issues). The text of the Output panel (channel "ASP Studio") and your VS Code and clingo versions help.
+
 ## Development
 
 ```bash
@@ -130,7 +174,7 @@ pytest python             # Python package tests
 node scripts/preview.js   # renders the panel with real data into .preview/index.html
 ```
 
-Press `F5` in VS Code to start an Extension Development Host.
+Press `F5` in VS Code to start an Extension Development Host. See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow.
 
 The code is split like this: `src/` is the extension host, `media/` holds the panel UI and the fixpoint engine, `python/` is the notebook and command-line package, `docs/` is the website and playground and `vendor/` has the unmodified clingo-wasm 0.6.0 files. The panel files in `media/` are copied into `python/src/asp_studio/static` by `python/sync_static.py` and into `docs/assets/panel` by `scripts/sync_docs.py`. Tests fail if a copy drifts apart.
 

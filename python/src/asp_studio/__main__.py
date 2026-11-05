@@ -7,6 +7,10 @@ import sys
 import webbrowser
 from typing import List, Optional
 
+import clingo
+
+from . import __version__
+from ._args import join_option_values
 from .render import page
 from .solver import solve
 
@@ -18,7 +22,8 @@ def _fail(message: str, code: int = 2) -> int:
 
 def main(argv: Optional[List[str]] = None) -> int:
     ap = argparse.ArgumentParser(prog="asp-studio", description="Solve ASP files and write an interactive HTML report.")
-    ap.add_argument("files", nargs="+", type=pathlib.Path, help=".lp files (joined in order)")
+    ap.add_argument("--version", action="version", version=f"asp-studio {__version__} (clingo {clingo.__version__})")
+    ap.add_argument("files", nargs="+", type=pathlib.Path, help=".lp files (joined in order), or - to read the program from standard input")
     ap.add_argument("-n", "--models", type=int, default=0, help="max answer sets (0 = all)")
     ap.add_argument("-o", "--options", default="", help='extra clingo options, e.g. "--opt-mode=optN"')
     ap.add_argument("-t", "--timeout", type=float, default=10.0, help="seconds (default 10)")
@@ -26,13 +31,17 @@ def main(argv: Optional[List[str]] = None) -> int:
     ap.add_argument("--tab", default="animator", choices=["animator", "answers", "graph", "console"])
     ap.add_argument("--theme", default="auto", choices=["auto", "light", "dark"])
     ap.add_argument("--open", action="store_true", help="open the report in the browser")
-    a = ap.parse_args(argv)
+    a = ap.parse_args(join_option_values(sys.argv[1:] if argv is None else list(argv)))
 
     if a.models < 0:
         return _fail("--models must be 0 or greater")
     if a.timeout <= 0:
         return _fail("--timeout must be greater than 0")
+    programs: list = []
     for f in a.files:
+        if str(f) == "-":
+            programs.append(("stdin", sys.stdin.read()))
+            continue
         if f.is_dir():
             return _fail(f"{f} is a directory, not a file")
         if not f.is_file():
@@ -43,12 +52,17 @@ def main(argv: Optional[List[str]] = None) -> int:
             return _fail(f"{f} is not UTF-8 text ({e.reason} at byte {e.start}); is it an ASP file?")
         except OSError as e:
             return _fail(f"cannot read {f}: {e.strerror or e}")
-    res = solve(list(a.files), models=a.models, options=a.options, timeout=a.timeout)
+        programs.append(f)
+    res = solve(programs, models=a.models, options=a.options, timeout=a.timeout)
 
-    out = a.out or a.files[0].with_suffix(".html")
+    first = a.files[0]
+    default = pathlib.Path("asp-studio.html") if str(first) == "-" else first.with_suffix(".html")
+    out = a.out or default
+    if out.is_dir():
+        out = out / default.name
     try:
         out.parent.mkdir(parents=True, exist_ok=True)
-        out.write_text(page(res, tab=a.tab, theme=a.theme, max_height=100000, title=a.files[0].name), encoding="utf-8")
+        out.write_text(page(res, tab=a.tab, theme=a.theme, max_height=100000, title="stdin" if str(first) == "-" else first.name), encoding="utf-8")
     except OSError as e:
         return _fail(f"cannot write {out}: {e.strerror or e}", 1)
 

@@ -87,3 +87,9 @@ def test_multi_file_diagnostics_point_at_the_right_file(tmp_path):
     d = r.diagnostics[0]
     assert (d.file, d.line, d.severity) == ("encoding.lp", 3, "error")
     assert r.to_state()["diagnostics"][0]["file"] == "encoding.lp"
+
+
+def test_name_text_pairs_name_their_diagnostics():
+    r = asp.solve([("instance.lp", "a.\n"), ("encoding.lp", "b :- c(.\n")])
+    assert (r.diagnostics[0].file, r.diagnostics[0].line) == ("encoding.lp", 1)
+    assert asp.solve(("one.lp", "a.")).ok

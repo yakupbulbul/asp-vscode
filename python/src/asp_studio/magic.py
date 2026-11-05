@@ -7,6 +7,7 @@ from typing import Any
 
 from IPython.core.magic import Magics, cell_magic, magics_class
 
+from ._args import join_option_values
 from .render import show
 from .solver import solve
 
@@ -33,7 +34,7 @@ class AspMagics(Magics):
               [--theme auto|light|dark] [--height PX] [--out NAME]
         """
         try:
-            a = _parser().parse_args(shlex.split(line))
+            a = _parser().parse_args(join_option_values(shlex.split(line)))
         except SystemExit:
             print(self.asp.__doc__)
             return None

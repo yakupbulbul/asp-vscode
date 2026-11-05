@@ -13,7 +13,7 @@
 <meta property="og:title" content="ASP Studio documentation">
 <meta property="og:image" content="https://yakupbulbul.github.io/asp-vscode/assets/og.png">
 <script>try{var t=localStorage.getItem("asp-theme")||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");document.documentElement.dataset.theme=t}catch(e){}</script>
-<link rel="stylesheet" href="assets/site.css?v=11">
+<link rel="stylesheet" href="assets/site.css?v=12">
 </head>
 <body data-sky="soft">
 <a class="skip" href="#main">Skip to content</a>
@@ -159,6 +159,9 @@ asp.show(res, tab="graph")</pre>
       <div class="label"><span>shell</span><button class="copy" type="button">Copy</button></div>
 <pre>asp-studio program.lp --open                 # writes program.html and opens it
 asp-studio instance.lp encoding.lp -n 3      # several files are joined in order
+cat program.lp | asp-studio - --out out.html # read the program from standard input
+asp-studio program.lp -o --opt-mode=optN     # extra clingo options
+asp-studio --version
 python -m asp_studio program.lp              # the same, without the script on PATH</pre>
     </div>
     <p>The exit code is 0 when the program ran, 1 when it has an error (positions are printed as <code>file:line:col</code>) and 2 for bad arguments or unreadable input.</p>

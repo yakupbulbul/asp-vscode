@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Command line: `-o --opt-mode=optN` now works (values that start with a dash), `--version`, reading the program from standard input with `-`, and `--out` may be a directory. `solve()` accepts `(name, text)` pairs.
+- Rewritten READMEs with screenshots and badges, and a CONTRIBUTING guide.
 - Online playground on the website: write ASP in the browser, run it with clingo (WebAssembly, nothing is uploaded) and use the same visualizer. Programs can be shared as a link.
 
 ## 0.2.3
