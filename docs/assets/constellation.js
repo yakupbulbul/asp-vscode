@@ -119,7 +119,7 @@
 
   function palette() {
     var dark = document.documentElement.dataset.theme === "dark";
-    var k = W < 820 ? 0.5 : 1;                                // keep text readable on small screens
+    var k = W < 820 ? 0.3 : 1;                                // keep text readable on small screens
     var c = dark
       ? { dot: "235,235,235", star: "255,255,255", line: "230,230,230", glow: "255,255,255",
           alpha: soft ? 0.34 : 0.62 }
@@ -182,9 +182,11 @@
       var g = ctx.createRadialGradient(x, y, 0, x, y, r * 6);
       g.addColorStop(0, "rgba(" + c.glow + ",0.55)");
       g.addColorStop(1, "rgba(" + c.glow + ",0)");
-      ctx.globalAlpha = c.alpha * a * tw;
-      ctx.fillStyle = g;
-      ctx.fillRect(x - r * 6, y - r * 6, r * 12, r * 12);
+      if (W >= 820) {                                    // the soft glow is skipped on small screens, where it would sit on top of text
+        ctx.globalAlpha = c.alpha * a * tw;
+        ctx.fillStyle = g;
+        ctx.fillRect(x - r * 6, y - r * 6, r * 12, r * 12);
+      }
       ctx.globalAlpha = Math.min(1, c.alpha * 1.6) * a;
       ctx.fillStyle = "rgba(" + c.star + ",1)";
       ctx.fillRect(snap(x) - PIX, snap(y) - PIX, PIX * 2, PIX * 2);

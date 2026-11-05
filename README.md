@@ -112,6 +112,7 @@ The animator follows positive programs: facts and rules without `not`. It reject
 | ASP: Open viASP for Current File | |
 | ASP: Select clingo Executable… | |
 | ASP: Remove Private Environment | |
+| ASP: Open Settings | |
 | ASP: Show Output Log | |
 
 Inside the panel, `←` and `→` step, `Space` plays or pauses and `R` resets.
