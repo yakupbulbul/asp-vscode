@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- New pixel-art logo for the extension icon, the website favicon and the site header.
+- The Python package `asp-studio` now uses the same version number as the extension. Version 0.2.2 is the first release after 0.1.0 and has no code changes beyond the version.
+
 ## 0.2.2
 
 - New Python package `asp-studio` (folder `python/`): `%%asp` cell magic, `asp_studio.solve()/show()` and a command-line HTML report, using the same visualizer. The extension itself is unchanged apart from sharing code with it.
