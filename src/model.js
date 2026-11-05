@@ -15,7 +15,7 @@ function buildAnimation(sources) {
     return {
       locations,
       view: {
-        rules: rules.map((r, i) => ({ text: r.text, file: sources[locations[i].sourceIndex].name, line: locations[i].line + 1, fact: !r.body.length })),
+        rules: rules.map((r, i) => ({ text: r.text, file: sources[locations[i].sourceIndex].name, line: locations[i].line + 1, endLine: locations[i].endLine + 1, fact: !r.body.length })),
         rounds: rounds.map(rd => rd.map(f => ({ pred: f.atom.pred, args: f.atom.args, atom: key(f.atom), rule: f.rule, subst: f.subst }))),
         incomplete: rules.incomplete || "",
       },

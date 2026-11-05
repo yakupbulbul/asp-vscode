@@ -56,7 +56,7 @@ kbd { border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 
 /* ---------- header ---------- */
 header.site { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: saturate(1.4) blur(12px); border-bottom: 1px solid var(--border); }
 header.site .wrap { display: flex; align-items: center; gap: 22px; height: 60px; }
-.brand { display: inline-flex; align-items: center; gap: 10px; font-weight: 700; color: var(--text); text-decoration: none; letter-spacing: -.01em; }
+.brand { white-space: nowrap; display: inline-flex; align-items: center; gap: 10px; font-weight: 700; color: var(--text); text-decoration: none; letter-spacing: -.01em; }
 .brand img { width: 28px; height: 28px; image-rendering: pixelated; }
 nav.main { display: flex; gap: 4px; margin-left: auto; align-items: center; }
 nav.main a { color: var(--muted); text-decoration: none; padding: 7px 12px; border-radius: 8px; font-size: .94rem; font-weight: 500; }

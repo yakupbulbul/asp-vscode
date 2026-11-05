@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Playground | ASP Studio</title>
+<meta name="description" content="Write an Answer Set Programming program and run it in your browser. clingo runs locally as WebAssembly, nothing is uploaded. See the answer sets, a graph and a step-by-step animation.">
+<link rel="canonical" href="https://yakupbulbul.github.io/asp-vscode/playground.html">
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png" sizes="192x192">
+<meta property="og:title" content="ASP Studio playground">
+<meta property="og:description" content="Run Answer Set Programming in your browser. No install, nothing uploaded.">
+<meta property="og:image" content="https://yakupbulbul.github.io/asp-vscode/assets/og.png">
+<script>try{var t=localStorage.getItem("asp-theme")||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="stylesheet" href="assets/site.css?v=11">
+<link rel="stylesheet" href="assets/playground.css?v=2">
+</head>
+<body data-sky="soft">
+<a class="skip" href="#editor">Skip to the editor</a>
+
+<header class="site">
+  <div class="wrap">
+    <a class="brand" href="./"><img src="assets/favicon.svg" alt="" width="28" height="28">ASP Studio</a>
+    <nav class="main" aria-label="Main">
+      <a href="./#install" class="hide-sm">Install</a>
+      <a href="playground.html" aria-current="page">Playground</a>
+      <a href="docs.html">Docs</a>
+      <a href="https://github.com/yakupbulbul/asp-vscode" class="hide-sm">GitHub</a>
+      <button class="icon-btn" id="theme-toggle" type="button" aria-label="Switch between light and dark theme">
+        <svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        <svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<main class="pg">
+  <div class="pg-bar" role="toolbar" aria-label="Playground controls">
+    <label class="pg-field">Example
+      <select id="examples" aria-label="Load an example"></select>
+    </label>
+    <button class="btn primary" id="run" type="button" title="Run (Ctrl or Cmd + Enter)">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z" fill="currentColor" stroke="none"/></svg>Run
+    </button>
+    <label class="pg-check"><input type="checkbox" id="auto" checked> Run while typing</label>
+    <label class="pg-field">Models <input type="number" id="models" min="0" value="0" title="0 means all answer sets"></label>
+    <label class="pg-field grow">Options <input type="text" id="options" placeholder="e.g. --opt-mode=optN -c n=6" spellcheck="false"></label>
+    <button class="btn" id="share" type="button" title="Copy a link that contains this program">Copy link</button>
+    <span id="status" class="pg-status" role="status" aria-live="polite">Loading clingo…</span>
+  </div>
+
+  <div class="pg-split">
+    <section class="pg-editor" aria-label="Program">
+      <div class="editor" id="editor">
+        <div id="gutter" aria-hidden="true"></div>
+        <div id="codewrap">
+          <pre id="hl" aria-hidden="true"></pre>
+          <textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" wrap="off" aria-label="ASP program"></textarea>
+        </div>
+      </div>
+      <div id="problems" aria-live="polite"></div>
+    </section>
+    <section class="pg-panel" aria-label="Results">
+      <iframe id="panel" title="ASP Studio visualizer" src="panel.html?v=1"></iframe>
+    </section>
+  </div>
+  <p class="pg-note">clingo runs in your browser as WebAssembly. Your program never leaves this page. The animator follows positive programs; the other tabs work for everything clingo accepts.</p>
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <div>ASP Studio is MIT licensed. clingo is MIT licensed, see the <a href="https://github.com/yakupbulbul/asp-vscode/blob/main/THIRD-PARTY-NOTICES.md">third-party notices</a>.</div>
+    <nav aria-label="Footer">
+      <a href="./">Home</a>
+      <a href="docs.html">Documentation</a>
+      <a href="https://github.com/yakupbulbul/asp-vscode">Source</a>
+      <a href="https://github.com/yakupbulbul/asp-vscode/issues">Issues</a>
+    </nav>
+  </div>
+</footer>
+<script src="assets/site.js?v=9"></script>
+<script src="assets/panel/engine.js?v=1"></script>
+<script src="assets/playground.js?v=3"></script>
+</body>
+</html>

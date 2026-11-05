@@ -4,6 +4,8 @@ ASP Studio runs [clingo](https://potassco.org/clingo/) on your Answer Set Progra
 
 Website with a live demo: <https://yakupbulbul.github.io/asp-vscode/>
 
+To try it without installing anything, use the [online playground](https://yakupbulbul.github.io/asp-vscode/playground.html). clingo runs in your browser as WebAssembly and your program is never uploaded.
+
 ## What it does
 
 - Solves the active `.lp` file with clingo, either while you type or on demand. Answer sets are grouped by predicate, and optimization costs show on the card.
@@ -130,7 +132,7 @@ node scripts/preview.js   # renders the panel with real data into .preview/index
 
 Press `F5` in VS Code to start an Extension Development Host.
 
-The code is split like this: `src/` is the extension host, `media/` holds the panel UI and the fixpoint engine, `python/` is the notebook and command-line package, `docs/` is the website and `vendor/` has the unmodified clingo-wasm 0.6.0 files. The panel files in `media/` are copied into `python/src/asp_studio/static` by `python/sync_static.py`, and a test fails if the copies drift apart.
+The code is split like this: `src/` is the extension host, `media/` holds the panel UI and the fixpoint engine, `python/` is the notebook and command-line package, `docs/` is the website and playground and `vendor/` has the unmodified clingo-wasm 0.6.0 files. The panel files in `media/` are copied into `python/src/asp_studio/static` by `python/sync_static.py` and into `docs/assets/panel` by `scripts/sync_docs.py`. Tests fail if a copy drifts apart.
 
 ## License
 

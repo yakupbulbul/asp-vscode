@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Online playground on the website: write ASP in the browser, run it with clingo (WebAssembly, nothing is uploaded) and use the same visualizer. Programs can be shared as a link.
+
 ## 0.2.3
 
 - New pixel-art logo for the extension icon.

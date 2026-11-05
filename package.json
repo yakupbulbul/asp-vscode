@@ -287,7 +287,7 @@
   "scripts": {
     "test": "node --test test/*.test.js",
     "package": "vsce package --no-dependencies",
-    "lint": "for f in src/*.js media/*.js scripts/*.js test/*.js test/integration/*.js; do node --check $f || exit 1; done",
+    "lint": "for f in src/*.js media/*.js scripts/*.js test/*.js test/integration/*.js docs/assets/*.js; do node --check $f || exit 1; done",
     "test:integration": "node test/integration/run.js"
   },
   "devDependencies": {

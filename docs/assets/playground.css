@@ -1,0 +1,53 @@
+/* playground page */
+.pg { width: min(1480px, 100% - 32px); margin: 0 auto; padding: 18px 0 40px; }
+.pg-bar { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px; background: color-mix(in srgb, var(--panel) 92%, transparent); margin-bottom: 12px; }
+.pg-bar .btn { padding: 7px 14px; font-size: .92rem; }
+.pg-field { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); font-size: .86rem; }
+.pg-field.grow { flex: 1; min-width: 200px; }
+.pg-field.grow input { flex: 1; min-width: 0; }
+.pg-check { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: .86rem; cursor: pointer; }
+.pg-bar select, .pg-bar input[type=text], .pg-bar input[type=number] { font: inherit; font-size: .9rem; color: var(--text); background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 6px 9px; }
+.pg-bar input[type=number] { width: 72px; }
+.pg-bar input[type=checkbox] { accent-color: var(--text); }
+.pg-status { margin-left: auto; color: var(--muted); font-size: .86rem; min-width: 150px; text-align: right; }
+.pg-status.ok { color: var(--text); } .pg-status.bad { color: var(--text); font-weight: 700; }
+
+.pg-split { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 12px; height: calc(100vh - 210px); min-height: 520px; }
+@media (max-width: 900px) { .pg-split { grid-template-columns: 1fr; height: auto; } .pg-panel { height: 640px; } .pg-editor { height: 380px; } }
+.pg-editor, .pg-panel { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--panel); display: flex; flex-direction: column; min-height: 0; }
+.pg-panel iframe { flex: 1; width: 100%; border: 0; background: var(--bg); }
+
+/* editor: transparent textarea over a highlighted copy of the text */
+.editor { flex: 1; min-height: 0; display: flex; overflow: hidden; font: 14px/1.6 var(--mono); }
+#gutter { flex: none; overflow: hidden; text-align: right; padding: 12px 10px 12px 12px; color: var(--muted); background: var(--bg-soft); border-right: 1px solid var(--border); user-select: none; white-space: pre; min-width: 44px; }
+#gutter div.bad { color: var(--text); font-weight: 700; }
+#gutter div.cur { color: var(--text); }
+#codewrap { position: relative; flex: 1; min-width: 0; }
+#hl, #code { position: absolute; inset: 0; margin: 0; padding: 12px 14px; font: inherit; line-height: inherit; letter-spacing: 0; tab-size: 2; white-space: pre; overflow: auto; border: 0; }
+#hl { pointer-events: none; color: var(--text); }
+#code { resize: none; outline: none; background: transparent; color: transparent; -webkit-text-fill-color: transparent; caret-color: var(--text); }
+#code::selection { background: color-mix(in srgb, var(--text) 22%, transparent); -webkit-text-fill-color: transparent; }
+.ln { display: inline-block; min-width: 100%; }
+.ln.err { text-decoration: underline wavy var(--text); text-underline-offset: 3px; }
+.ln.warnl { text-decoration: underline dotted var(--muted); text-underline-offset: 3px; }
+.ln.fire { background: color-mix(in srgb, var(--text) 14%, transparent); box-shadow: inset 3px 0 0 var(--text); }
+.t-comment { color: var(--muted); font-style: italic; }
+.t-kw { font-weight: 700; }
+.t-var { color: color-mix(in srgb, var(--text) 68%, var(--bg)); }
+.t-pred { font-weight: 600; }
+.t-num, .t-str { color: color-mix(in srgb, var(--text) 60%, var(--bg)); }
+.t-dir { font-weight: 700; font-style: italic; }
+#problems { flex: none; max-height: 130px; overflow: auto; border-top: 1px solid var(--border); background: var(--bg-soft); font: 12.5px/1.5 var(--mono); }
+#problems:empty { display: none; }
+#problems div { padding: 4px 12px; cursor: pointer; white-space: pre-wrap; }
+#problems div:hover { background: color-mix(in srgb, var(--text) 8%, transparent); }
+#problems .e::before { content: "✕ "; font-weight: 700; }
+#problems .w::before { content: "! "; font-weight: 700; }
+.pg-note { color: var(--muted); font-size: .88rem; margin: 14px 4px 0; }
+
+@media (max-width: 640px) {
+  .pg { width: calc(100% - 24px); }
+  .pg-field:first-child { width: 100%; }
+  .pg-field select { flex: 1; min-width: 0; max-width: 100%; }
+  .pg-status { margin-left: 0; text-align: left; min-width: 0; width: 100%; }
+}

@@ -174,7 +174,7 @@
     try {
       const rules = parseProgram(text), rounds = evaluate(rules);
       return {
-        rules: rules.map(r => ({ text: r.text, file, line: r.line + 1, fact: !r.body.length })),
+        rules: rules.map(r => ({ text: r.text, file, line: r.line + 1, endLine: r.endLine + 1, fact: !r.body.length })),
         rounds: rounds.map(rd => rd.map(f => ({ pred: f.atom.pred, args: f.atom.args, atom: key(f.atom), rule: f.rule, subst: f.subst }))),
         incomplete: rules.incomplete || "",
       };
