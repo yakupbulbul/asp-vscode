@@ -121,9 +121,9 @@
     var dark = document.documentElement.dataset.theme === "dark";
     var k = W < 820 ? 0.5 : 1;                                // keep text readable on small screens
     var c = dark
-      ? { dot: "200,214,255", star: "255,255,255", line: "170,205,255", glow: "120,170,255",
+      ? { dot: "235,235,235", star: "255,255,255", line: "230,230,230", glow: "255,255,255",
           alpha: soft ? 0.34 : 0.62 }
-      : { dot: "15,23,42", star: "36,89,214", line: "36,89,214", glow: "36,89,214",
+      : { dot: "10,10,10", star: "10,10,10", line: "10,10,10", glow: "10,10,10",
           alpha: soft ? 0.2 : 0.4 };
     c.alpha *= k;
     return c;

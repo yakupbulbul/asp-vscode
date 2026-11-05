@@ -1,16 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1b2a4a"/><stop offset="1" stop-color="#0f1626"/></linearGradient>
-    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#5aa9ff"/></marker>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2c2c2c"/><stop offset="1" stop-color="#0a0a0a"/></linearGradient>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#f5f5f5"/></marker>
   </defs>
   <rect width="128" height="128" rx="24" fill="url(#bg)"/>
-  <g fill="none" stroke="#5aa9ff" stroke-width="4" stroke-linecap="round">
+  <g fill="none" stroke="#f5f5f5" stroke-width="4" stroke-linecap="round">
     <path d="M40 78 L60 50" marker-end="url(#ar)"/>
-    <path d="M40 78 L88 78" marker-end="url(#ar)" stroke="#8a97b3"/>
-    <path d="M68 44 L96 50" marker-end="url(#ar)" stroke="#f0a04b"/>
+    <path d="M40 78 L88 78" marker-end="url(#ar)" stroke="#8c8c8c"/>
+    <path d="M68 44 L96 50" marker-end="url(#ar)" stroke="#bdbdbd"/>
   </g>
-  <g stroke="#e8eefc" stroke-width="3.5" fill="#16213b">
+  <g stroke="#f5f5f5" stroke-width="3.5" fill="#111111">
     <circle cx="32" cy="84" r="12"/><circle cx="66" cy="42" r="12"/><circle cx="98" cy="84" r="12"/>
   </g>
-  <circle cx="32" cy="84" r="4" fill="#e8eefc"/><circle cx="66" cy="42" r="4" fill="#f0a04b"/><circle cx="98" cy="84" r="4" fill="#5aa9ff"/>
+  <circle cx="32" cy="84" r="4" fill="#f5f5f5"/><circle cx="66" cy="42" r="4" fill="#bdbdbd"/><circle cx="98" cy="84" r="4" fill="#f5f5f5"/>
 </svg>
