@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.2.7
 
 - Graph: edges bend only when needed. An edge that would run through another node becomes an arc whose height grows with its length, an edge with an opposite edge bows apart from it, and an edge that repeats the same ends gets its own arc. On a chain of nodes the long edges no longer pile up on the short ones, and in a cycle the edges stay straight. Self-loops point into the emptiest direction instead of always up, so they are no longer cut off at the edge of the picture. Edge labels are larger and have an outline.
 

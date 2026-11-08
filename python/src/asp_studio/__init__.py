@@ -9,7 +9,7 @@ In a notebook: ``%load_ext asp_studio`` and start a cell with ``%%asp``.
 from .solver import Diagnostic, Result, solve
 from .render import iframe, page, show
 
-__version__ = "0.2.6"
+__version__ = "0.2.7"
 __all__ = ["solve", "show", "Result", "Diagnostic", "page", "iframe", "load_ipython_extension", "__version__"]
 
 
