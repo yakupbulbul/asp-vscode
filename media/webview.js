@@ -78,7 +78,7 @@
     return pos;
   }
 
-  /** g = { nodes, pos, edges:[{u,v,pred,label,fresh,base,fact,title}], badges:{node:[text]}, colors:{pred:css color} } */
+  /** g = { nodes, pos, edges:[{u,v,pred,label,fresh,base,title}], badges:{node:[text]}, colors:{pred:css color} } */
   function drawGraph(svg, g, onDrag) {
     svg.innerHTML = "";
     const defs = mk("defs"); svg.appendChild(defs);
@@ -88,23 +88,44 @@
       const m = mk("marker", { id, viewBox: "0 0 10 10", refX: 9, refY: 5, markerUnits: "userSpaceOnUse", markerWidth: 10, markerHeight: 10, orient: "auto-start-reverse" });
       const p = mk("path", { d: "M0,0 L10,5 L0,10 z" }); p.style.fill = c; m.appendChild(p); defs.appendChild(m); return id;
     })());
-    const R = 19, H = (svg.viewBox && svg.viewBox.baseVal && svg.viewBox.baseVal.height) || 380, pair = {}, layer = mk("g"); svg.appendChild(layer);
+    const vb = svg.viewBox && svg.viewBox.baseVal, W = (vb && vb.width) || 700, H = (vb && vb.height) || 380;
+    const R = 19, slot = {}, layer = mk("g"); svg.appendChild(layer);
+    const has = new Set(g.edges.map(e => e.u + "|" + e.v)), loopDir = {};
+    const ns = g.nodes.filter(m => g.pos[m]);
+    const cx0 = ns.reduce((a, m) => a + g.pos[m].x, 0) / (ns.length || 1), cy0 = ns.reduce((a, m) => a + g.pos[m].y, 0) / (ns.length || 1);
+    /** A self-loop points into the emptiest direction: away from the node's other edges, inside the canvas, preferably outward and up. */
+    const dirOf = u => loopDir[u] ??= (() => {
+      const p = g.pos[u], used = [];
+      g.edges.forEach(e => { if (e.u === e.v) return; const o = e.u === u ? g.pos[e.v] : e.v === u ? g.pos[e.u] : null; if (o) used.push(Math.atan2(o.y - p.y, o.x - p.x)); });
+      let best = -Math.PI / 2, top = -Infinity;
+      for (let k = 0; k < 8; k++) {
+        const a = -Math.PI / 2 + k * Math.PI / 4, ax = p.x + Math.cos(a) * 52, ay = p.y + Math.sin(a) * 52;
+        const gap = used.reduce((m, b) => Math.min(m, Math.abs(Math.atan2(Math.sin(a - b), Math.cos(a - b)))), Math.PI);
+        const score = gap + (ax > 10 && ax < W - 10 && ay > 10 && ay < H - 10 ? 0 : -10) + (Math.cos(a) * (p.x - cx0) + Math.sin(a) * (p.y - cy0)) / 400 + (k === 0 ? .01 : 0);
+        if (score > top) { top = score; best = a; }
+      }
+      return best;
+    })();
     g.edges.forEach(e => {
       const p = g.pos[e.u], q = g.pos[e.v]; if (!p || !q) return;
       const col = e.base ? "var(--base)" : (g.colors[e.pred] || "var(--c0)");
-      const pk = [e.u, e.v].sort().join("|"), n = pair[pk] = (pair[pk] ?? -1) + 1;
+      const key = e.u + "|" + e.v, n = slot[key] = (slot[key] ?? -1) + 1;     // n-th edge with the same ends and direction
       let d, lx, ly;
-      if (e.u === e.v) { d = `M${p.x - 8},${p.y - R} C${p.x - 40},${p.y - 75 - n * 14} ${p.x + 40},${p.y - 75 - n * 14} ${p.x + 8},${p.y - R}`; lx = p.x; ly = p.y - 62 - n * 10; }
+      if (e.u === e.v) {
+        const a = dirOf(e.u), ox = Math.cos(a), oy = Math.sin(a), D = 62 + n * 14, pt = (r, t) => `${p.x + ox * r - oy * t},${p.y + oy * r + ox * t}`;
+        d = `M${pt(R, -7)} C${pt(D, -34)} ${pt(D, 34)} ${pt(R, 7)}`;
+        lx = p.x + ox * (.25 * R + .75 * D + 9); ly = p.y + oy * (.25 * R + .75 * D + 9) + 4;
+      }
       else {
         const dx = q.x - p.x, dy = q.y - p.y, len = Math.hypot(dx, dy) || 1, ux = dx / len, uy = dy / len;
-        // Arc height grows with the edge length, so a long edge clears the nodes it spans and nests outside shorter ones.
-        // A fact edge stays straight unless it would run through another node.
+        // An edge bends only when it has to: it runs through another node (the arc grows with its length, so it clears the nodes it
+        // spans and nests outside shorter ones), it has an opposite edge (the pair bows apart), or it repeats the same ends (n > 0).
         const blocked = g.nodes.some(m => {
           const c = g.pos[m]; if (!c || m === e.u || m === e.v) return false;
           const t = ((c.x - p.x) * dx + (c.y - p.y) * dy) / (len * len);
           return t > 0 && t < 1 && Math.hypot(c.x - (p.x + t * dx), c.y - (p.y + t * dy)) < R + 6;
         });
-        const h = (n === 0 && (e.base || e.fact) && !blocked) ? 0 : Math.min(14 + .18 * len, Math.max(40, H / 2 - R - 14)) + n * 16;
+        const h = (blocked ? Math.min(14 + .18 * len, Math.max(40, H / 2 - R - 14)) : has.has(e.v + "|" + e.u) ? 16 : 0) + n * 16;
         const cx = (p.x + q.x) / 2 - uy * 2 * h, cy = (p.y + q.y) / 2 + ux * 2 * h;          // control point of the quadratic arc
         const toward = (a, b, r) => { const l = Math.hypot(b.x - a.x, b.y - a.y) || 1; return { x: a.x + (b.x - a.x) / l * r, y: a.y + (b.y - a.y) / l * r }; };
         const s0 = toward(p, { x: cx, y: cy }, R), e0 = toward(q, { x: cx, y: cy }, R + 6);
@@ -307,7 +328,7 @@
 
     const edges = [], badges = {};
     for (let k = 0; k <= aT; k++) rounds[k].forEach(f => {
-      if (f.args.length === 2) edges.push({ u: f.args[0], v: f.args[1], pred: f.pred, base: aColors[f.pred] === "base", label: aColors[f.pred] === "base" ? "" : "r" + k, fact: k === 0, fresh: k === aT && aT > 0, title: `${f.atom} (round ${k})` });
+      if (f.args.length === 2) edges.push({ u: f.args[0], v: f.args[1], pred: f.pred, base: aColors[f.pred] === "base", label: aColors[f.pred] === "base" ? "" : "r" + k, fresh: k === aT && aT > 0, title: `${f.atom} (round ${k})` });
       else if (f.args.length === 1) (badges[f.args[0]] ||= []).push(f.pred);
     });
     drawGraph($("aSvg"), { nodes: aNodes, pos: aPos, edges, badges, colors: aColors }, null);
