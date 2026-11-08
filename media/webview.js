@@ -78,7 +78,7 @@
     return pos;
   }
 
-  /** g = { nodes, pos, edges:[{u,v,pred,label,fresh,base,title}], badges:{node:[text]}, colors:{pred:css color} } */
+  /** g = { nodes, pos, edges:[{u,v,pred,label,fresh,base,fact,title}], badges:{node:[text]}, colors:{pred:css color} } */
   function drawGraph(svg, g, onDrag) {
     svg.innerHTML = "";
     const defs = mk("defs"); svg.appendChild(defs);
@@ -88,7 +88,7 @@
       const m = mk("marker", { id, viewBox: "0 0 10 10", refX: 9, refY: 5, markerUnits: "userSpaceOnUse", markerWidth: 10, markerHeight: 10, orient: "auto-start-reverse" });
       const p = mk("path", { d: "M0,0 L10,5 L0,10 z" }); p.style.fill = c; m.appendChild(p); defs.appendChild(m); return id;
     })());
-    const R = 19, pair = {}, layer = mk("g"); svg.appendChild(layer);
+    const R = 19, H = (svg.viewBox && svg.viewBox.baseVal && svg.viewBox.baseVal.height) || 380, pair = {}, layer = mk("g"); svg.appendChild(layer);
     g.edges.forEach(e => {
       const p = g.pos[e.u], q = g.pos[e.v]; if (!p || !q) return;
       const col = e.base ? "var(--base)" : (g.colors[e.pred] || "var(--c0)");
@@ -97,9 +97,19 @@
       if (e.u === e.v) { d = `M${p.x - 8},${p.y - R} C${p.x - 40},${p.y - 75 - n * 14} ${p.x + 40},${p.y - 75 - n * 14} ${p.x + 8},${p.y - R}`; lx = p.x; ly = p.y - 62 - n * 10; }
       else {
         const dx = q.x - p.x, dy = q.y - p.y, len = Math.hypot(dx, dy) || 1, ux = dx / len, uy = dy / len;
-        const sx = p.x + ux * R, sy = p.y + uy * R, ex = q.x - ux * (R + 6), ey = q.y - uy * (R + 6);
-        const bend = (n === 0 && e.base) ? 0 : 20 + n * 16, mx = (sx + ex) / 2 - uy * bend, my = (sy + ey) / 2 + ux * bend;
-        d = `M${sx},${sy} Q${mx},${my} ${ex},${ey}`; lx = (sx + ex) / 2 - uy * bend / 2; ly = (sy + ey) / 2 + ux * bend / 2 - 3;
+        // Arc height grows with the edge length, so a long edge clears the nodes it spans and nests outside shorter ones.
+        // A fact edge stays straight unless it would run through another node.
+        const blocked = g.nodes.some(m => {
+          const c = g.pos[m]; if (!c || m === e.u || m === e.v) return false;
+          const t = ((c.x - p.x) * dx + (c.y - p.y) * dy) / (len * len);
+          return t > 0 && t < 1 && Math.hypot(c.x - (p.x + t * dx), c.y - (p.y + t * dy)) < R + 6;
+        });
+        const h = (n === 0 && (e.base || e.fact) && !blocked) ? 0 : Math.min(14 + .18 * len, Math.max(40, H / 2 - R - 14)) + n * 16;
+        const cx = (p.x + q.x) / 2 - uy * 2 * h, cy = (p.y + q.y) / 2 + ux * 2 * h;          // control point of the quadratic arc
+        const toward = (a, b, r) => { const l = Math.hypot(b.x - a.x, b.y - a.y) || 1; return { x: a.x + (b.x - a.x) / l * r, y: a.y + (b.y - a.y) / l * r }; };
+        const s0 = toward(p, { x: cx, y: cy }, R), e0 = toward(q, { x: cx, y: cy }, R + 6);
+        d = `M${s0.x},${s0.y} Q${cx},${cy} ${e0.x},${e0.y}`;
+        lx = (s0.x + 2 * cx + e0.x) / 4 - uy * (h ? 9 : 0); ly = (s0.y + 2 * cy + e0.y) / 4 + ux * (h ? 9 : 0) - (h ? 0 : 5);
       }
       const path = mk("path", { d, class: "edge" + (e.fresh ? " fresh" : ""), "marker-end": `url(#${marker(col)})` });
       path.style.stroke = col;
@@ -297,7 +307,7 @@
 
     const edges = [], badges = {};
     for (let k = 0; k <= aT; k++) rounds[k].forEach(f => {
-      if (f.args.length === 2) edges.push({ u: f.args[0], v: f.args[1], pred: f.pred, base: aColors[f.pred] === "base", label: aColors[f.pred] === "base" ? "" : "r" + k, fresh: k === aT && aT > 0, title: `${f.atom} (round ${k})` });
+      if (f.args.length === 2) edges.push({ u: f.args[0], v: f.args[1], pred: f.pred, base: aColors[f.pred] === "base", label: aColors[f.pred] === "base" ? "" : "r" + k, fact: k === 0, fresh: k === aT && aT > 0, title: `${f.atom} (round ${k})` });
       else if (f.args.length === 1) (badges[f.args[0]] ||= []).push(f.pred);
     });
     drawGraph($("aSvg"), { nodes: aNodes, pos: aPos, edges, badges, colors: aColors }, null);

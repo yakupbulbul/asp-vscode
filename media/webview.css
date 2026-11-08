@@ -144,7 +144,7 @@ svg.graph { width: 100%; height: auto; display: block; background: var(--bg); bo
 .edge.fresh { stroke-width: 3.5; stroke-dasharray: 600; stroke-dashoffset: 600; animation: draw .8s ease forwards; }
 @keyframes draw { to { stroke-dashoffset: 0; } }
 @media (prefers-reduced-motion: reduce) { .edge.fresh { animation: none; stroke-dashoffset: 0; } }
-.elabel { font-size: 10px; fill: var(--muted); text-anchor: middle; }
+.elabel { font-size: 11px; font-weight: 600; fill: var(--muted); text-anchor: middle; paint-order: stroke; stroke: var(--card); stroke-width: 3px; stroke-linejoin: round; }
 .legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; color: var(--muted); padding: 6px 4px 2px; }
 .legend i { display: inline-block; width: 16px; height: 3px; border-radius: 2px; vertical-align: middle; margin-right: 5px; }
 .toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 8px 12px; border-bottom: 1px solid var(--border); font-size: 12px; }

@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Graph: derived edges are drawn as arcs whose height grows with the edge length, so on a chain of nodes the long edges no longer pile up on the short ones. Fact edges stay straight unless they would run through another node. Edge labels are larger and have an outline so they stay readable over a line.
+
 ## 0.2.6
 
 - Documentation: the commands table now lists **ASP: Open Settings**. The website background is calmer on small screens. No code changes.
