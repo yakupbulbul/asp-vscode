@@ -8,6 +8,7 @@
   if (query.get("tab")) init.tab = query.get("tab");
   if (query.get("round") !== null && /^\d+$/.test(query.get("round"))) window.__ASP_START_ROUND__ = +query.get("round");   // animator starts at this round
   window.__ASP_EMBED__ = true;
+  window.__ASP_NO_COUNT__ = true;                           // no solver behind a notebook output
   const root = document.documentElement;
   root.classList.add("embed-doc");
 

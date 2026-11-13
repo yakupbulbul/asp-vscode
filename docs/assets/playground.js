@@ -20,7 +20,7 @@
   var code = $("code"), hl = $("hl"), gutter = $("gutter"), problemsEl = $("problems"), statusEl = $("status");
   var frame = $("panel"), runBtn = $("run");
   var worker = null, workerReady = false, pending = {}, nextId = 1, seq = 0;
-  var lastState = null, lastAnim = null, lastGround = null, problems = [], fireLines = {}, runTimer = null, panelReady = false;
+  var lastState = null, lastAnim = null, lastGround = null, countJob = null, problems = [], fireLines = {}, runTimer = null, panelReady = false;
 
   function setStatus(text, cls) { statusEl.textContent = text; statusEl.className = "pg-status" + (cls ? " " + cls : ""); }
 
@@ -162,7 +162,7 @@
     var my = ++seq, program = code.value;
     fireLines = {};
     if (!program.trim()) {
-      problems = []; renderProblems(); renderEditor(); lastAnim = null; lastGround = null;
+      problems = []; renderProblems(); renderEditor(); lastAnim = null; lastGround = null; countJob = null;
       post({ type: "state", file: { name: "playground.lp", scope: "activeFile" }, status: "idle", solve: null, anim: null, empty: true, settings: { speed: 1400 } });
       setStatus("Ready", ""); return;
     }
@@ -182,17 +182,18 @@
     renderProblems(); renderEditor();
     lastAnim = window.AspEngine ? window.AspEngine.animationFor(program, "playground.lp") : null;
     lastGround = window.AspEngine ? window.AspEngine.groundingFor(program, "playground.lp") : null;
-    var countAll = capped && s.more && !s.error && !s.models.some(function (m) { return m.costs; });
-    s.counting = !!countAll;
     var stateOf = function () { return { type: "state", file: { name: "playground.lp", scope: "activeFile" }, status: s.error ? "error" : "done", solve: s, anim: lastAnim, ground: lastGround, empty: false, settings: { speed: 1400 } }; };
     post(stateOf());
-    if (countAll) {                                       // auto-run stopped early: count all answer sets in the background
+    // the "Count all" button of the Answer Sets tab asks for this
+    countJob = async function () {
+      if (s.counting || s.total != null) return;
+      s.counting = true; post(stateOf());
       var cd = await solveInWorker(program, "--outf=2 0 --quiet=2" + (extra ? " " + extra : ""), 10000);
       if (my !== seq) return;
       s.counting = false;
-      try { var cj = JSON.parse(cd.out); if (cj.Models && cj.Models.More !== "yes" && Number.isInteger(cj.Models.Number)) s.total = cj.Models.Number; } catch (e) { /* no count: keep "at least" */ }
+      try { var cj = JSON.parse(cd.out); if (cj.Models && cj.Models.More !== "yes" && Number.isInteger(cj.Models.Number)) s.total = cj.Models.Number; else s.countFailed = "error"; } catch (e) { s.countFailed = cd.timeout ? "timeout" : "error"; }
       post(stateOf());
-    }
+    };
     if (s.error) setStatus(s.timedOut ? "Timeout" : "Error", "bad");
     else setStatus(s.result + " · " + s.totalModels + (s.totalModels === 1 ? " model" : " models") + " · " + ms + " ms", s.result === "UNSATISFIABLE" ? "" : "ok");
   }
@@ -206,6 +207,7 @@
     else if (m.type === "reveal" && lastAnim && lastAnim.rules && lastAnim.rules[m.rule]) revealLine(lastAnim.rules[m.rule].line);
     else if (m.type === "revealLine") revealLine(m.line);
     else if (m.type === "copy") { if (navigator.clipboard) navigator.clipboard.writeText(String(m.text || "")); }
+    else if (m.type === "count") { if (countJob) countJob(); }
     else if (m.type === "groundStep") {
       fireLines = {};
       var gr = lastGround && lastGround.rules && m.rule !== null ? lastGround.rules[m.rule] : null;

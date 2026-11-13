@@ -544,13 +544,14 @@
     if (r.result === "UNSATISFIABLE") { main.innerHTML = `<div class="empty"><h2>No answer set</h2>The program is unsatisfiable. Are the constraints too strict?</div>`; return; }
     ui.model = Math.min(ui.model, Math.max(0, r.models.length - 1));
     main.innerHTML = `<div class="stack">
-      ${r.capped && r.more ? `<div class="notice">${r.total != null ? `Auto-run shows ${r.totalModels} of <b>${r.total}</b> answer sets.` : `Auto-run stopped at ${r.capped} models.${r.counting ? " Counting all answer sets…" : ""}`} Press <b>Solve</b> to compute all of them.</div>` : ""}
+      ${r.capped && r.more ? `<div class="notice">${r.total != null ? `Auto-run shows ${r.totalModels} of <b>${r.total}</b> answer sets.` : `Auto-run stopped at ${r.capped} models.`} Press <b>Solve</b> to compute all of them.${r.total == null && !window.__ASP_NO_COUNT__ && !r.models.some(m => m.costs) ? (r.counting ? " <span class=\"muted\">Counting…</span>" : ` <button class="btn" id="countBtn" title="Count all answer sets without listing them. This can take a while on big programs.">Count all</button>${r.countFailed ? ` <span class="muted small">${r.countFailed === "timeout" ? "Counting timed out." : "Counting failed."}</span>` : ""}`) : ""}</div>` : ""}
       ${r.models.map((m, i) => `<section class="card model ${i === ui.model ? "sel" : ""}" data-i="${i}">
         <h3><span class="mh"><b>Answer ${i + 1}</b><span class="chip">${plural(m.atoms.length, "atom")}</span>${m.costs ? `<span class="chip" title="Optimisation cost">cost ${esc(m.costs.join(", "))}</span>` : ""}</span><button class="icon-btn" data-copy="${i}" title="Copy atoms" aria-label="Copy atoms">${ICON.copy}</button></h3>
         ${m.atoms.length ? chipGroups(m.atoms) : '<div class="pad muted">(empty answer set)</div>'}
       </section>`).join("")}
       ${r.totalModels > r.models.length ? `<div class="muted small">… ${r.totalModels - r.models.length} more not shown (setting <code>asp.maxModelsShown</code>).</div>` : ""}
     </div>`;
+    const cb = $("countBtn"); if (cb) cb.onclick = () => vscode.postMessage({ type: "count" });
     main.querySelectorAll(".model").forEach(n => n.onclick = ev => {
       const c = ev.target.closest("[data-copy]");
       if (c) { vscode.postMessage({ type: "copy", text: r.models[+c.dataset.copy].atoms.join(" ") }); return; }
