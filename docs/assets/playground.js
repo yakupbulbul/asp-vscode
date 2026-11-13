@@ -182,7 +182,17 @@
     renderProblems(); renderEditor();
     lastAnim = window.AspEngine ? window.AspEngine.animationFor(program, "playground.lp") : null;
     lastGround = window.AspEngine ? window.AspEngine.groundingFor(program, "playground.lp") : null;
-    post({ type: "state", file: { name: "playground.lp", scope: "activeFile" }, status: s.error ? "error" : "done", solve: s, anim: lastAnim, ground: lastGround, empty: false, settings: { speed: 1400 } });
+    var countAll = capped && s.more && !s.error && !s.models.some(function (m) { return m.costs; });
+    s.counting = !!countAll;
+    var stateOf = function () { return { type: "state", file: { name: "playground.lp", scope: "activeFile" }, status: s.error ? "error" : "done", solve: s, anim: lastAnim, ground: lastGround, empty: false, settings: { speed: 1400 } }; };
+    post(stateOf());
+    if (countAll) {                                       // auto-run stopped early: count all answer sets in the background
+      var cd = await solveInWorker(program, "--outf=2 0 --quiet=2" + (extra ? " " + extra : ""), 10000);
+      if (my !== seq) return;
+      s.counting = false;
+      try { var cj = JSON.parse(cd.out); if (cj.Models && cj.Models.More !== "yes" && Number.isInteger(cj.Models.Number)) s.total = cj.Models.Number; } catch (e) { /* no count: keep "at least" */ }
+      post(stateOf());
+    }
     if (s.error) setStatus(s.timedOut ? "Timeout" : "Error", "bad");
     else setStatus(s.result + " · " + s.totalModels + (s.totalModels === 1 ? " model" : " models") + " · " + ms + " ms", s.result === "UNSATISFIABLE" ? "" : "ok");
   }

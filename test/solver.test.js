@@ -31,6 +31,15 @@ test("model limit and 'more' flag", async () => {
   assert.equal(r.more, true);
 });
 
+for (const wasm of [true, false]) {
+  test(`counts all answer sets without listing them (${wasm ? "wasm" : "native"})`, async t => {
+    if (!wasm && !(await findClingo())) return t.skip("no native clingo");
+    const r = await solve([{ text: "{ a(1..10) }.\n" }], { preferWasm: wasm, models: 0, extraArgs: ["--quiet=2"] });
+    assert.equal(r.count, 1024);
+    assert.equal(r.more, false);
+  });
+}
+
 test("unsatisfiable programs", async () => {
   const r = await solve([{ text: "a.\n:- a.\n" }], { preferWasm: true });
   assert.equal(r.result, "UNSATISFIABLE");

@@ -60,6 +60,7 @@ function parseResult(out) {
     models: witnesses.map(w => ({ atoms: w.Value || [], costs: w.Costs || null })),
     more: !!(json.Models && json.Models.More === "yes"),
     time: json.Time && json.Time.Total,
+    count: json.Models && Number.isInteger(json.Models.Number) ? json.Models.Number : null,
   };
 }
 

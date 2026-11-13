@@ -168,7 +168,7 @@
 
     let meta = "";
     if (r && !r.error) {
-      meta = `${plural(r.totalModels, "model")}${r.more ? " (more available)" : ""} · ${fmtMs(r.ms)}` + (r.time != null ? ` · clingo ${r.time.toFixed(3)} s` : "");
+      meta = `${plural(r.totalModels, "model")}${r.total != null ? ` of ${r.total}` : r.more ? " (more available)" : ""} · ${fmtMs(r.ms)}` + (r.time != null ? ` · clingo ${r.time.toFixed(3)} s` : "");
       if (r.capped && r.more) meta += ` · auto-run limit ${r.capped}`;
     }
     const engineName = ENGINE_NAMES[r && r.engine] || "";
@@ -468,7 +468,7 @@
       default: {
         const r = st.solve;
         let res = "";
-        if (r && !r.error) res = r.result === "UNSATISFIABLE" ? " clingo finds no answer set." : ` clingo finds ${r.more ? "at least " : ""}${plural(r.totalModels, "answer set")}.`;
+        if (r && !r.error) res = r.result === "UNSATISFIABLE" ? " clingo finds no answer set." : ` clingo finds ${r.total != null ? "" : r.more ? "at least " : ""}${plural(r.total != null ? r.total : r.totalModels, "answer set")}.`;
         return `Grounding is complete: ${plural(g.ground.length, "ground rule")}.${res} <span class="muted">clingo's own grounder simplifies a little more and may order the rules differently.</span>`;
       }
     }
@@ -544,7 +544,7 @@
     if (r.result === "UNSATISFIABLE") { main.innerHTML = `<div class="empty"><h2>No answer set</h2>The program is unsatisfiable. Are the constraints too strict?</div>`; return; }
     ui.model = Math.min(ui.model, Math.max(0, r.models.length - 1));
     main.innerHTML = `<div class="stack">
-      ${r.capped && r.more ? `<div class="notice">Auto-run stopped at ${r.capped} models. Press <b>Solve</b> to compute all of them.</div>` : ""}
+      ${r.capped && r.more ? `<div class="notice">${r.total != null ? `Auto-run shows ${r.totalModels} of <b>${r.total}</b> answer sets.` : `Auto-run stopped at ${r.capped} models.${r.counting ? " Counting all answer sets…" : ""}`} Press <b>Solve</b> to compute all of them.</div>` : ""}
       ${r.models.map((m, i) => `<section class="card model ${i === ui.model ? "sel" : ""}" data-i="${i}">
         <h3><span class="mh"><b>Answer ${i + 1}</b><span class="chip">${plural(m.atoms.length, "atom")}</span>${m.costs ? `<span class="chip" title="Optimisation cost">cost ${esc(m.costs.join(", "))}</span>` : ""}</span><button class="icon-btn" data-copy="${i}" title="Copy atoms" aria-label="Copy atoms">${ICON.copy}</button></h3>
         ${m.atoms.length ? chipGroups(m.atoms) : '<div class="pad muted">(empty answer set)</div>'}

@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Answer Sets: when auto-run stops at its model limit, the extension now counts all answer sets in the background (clingo with `--quiet=2`, same timeout) and shows the total, for example "Auto-run shows 50 of 4096 answer sets". While it counts, the notice says so. If the count times out, the old message stays. Optimisation programs are not counted. The playground does the same, and the Grounding tab's last step uses the total.
 - New **Grounding** tab. It animates how clingo's grounding turns a rule with variables into ground rules. For `{ c(N,C) : color(C) } = 1 :- node(N).` the body literal `node(N)` is the outer loop, the conditional literal `color(C)` is an inner loop that fills a set, and when it ends the set closes as `{ c(1,r); c(1,g); c(1,b) } = 1.` The panel highlights the active part of the rule, lists the loops with their current values, shows the set being built and the ground rules so far, and ends with the number of answer sets. It handles ranges, pools, normal rules, constraints, disjunctions, choice rules with bounds and conditions, comparisons, `not`, arithmetic and `#const`. Steps and keys are the same as in the Animator (the step, play and reset commands work on both tabs), and the rule being expanded is highlighted in the editor. The steps are built from the rules themselves, so a rule with an aggregate in its body is listed as not shown. Also available in the playground, in notebooks (`--tab grounding`) and in the command line report.
 
 ## 0.2.7

@@ -85,6 +85,7 @@ class Controller {
     const doc = this.target;
     if (!doc) return;
     if (this.abort) this.abort.abort();
+    if (this.countAbort) this.countAbort.abort();
     const abort = this.abort = new AbortController();
     const my = ++this.seq;
     const c = cfg();
@@ -112,6 +113,9 @@ class Controller {
     });
     if (my !== this.seq || result.cancelled) return;
     result.capped = capped;
+    // auto-run stopped early: count all answer sets in the background (not for optimisation, where "all models" is meaningless)
+    const countAll = !!(this.panel && capped && result.more && !result.error && !result.models.some(m => m.costs));
+    result.counting = countAll;
     this.log.appendLine(`[${new Date().toLocaleTimeString()}] ${result.command}  (${result.engine} ${result.version}, ${result.ms} ms)` +
       ` -> ${result.error ? "ERROR: " + result.error : result.result + ", " + result.models.length + " model(s)"}`);
     if (result.stderr.trim()) this.log.appendLine(result.stderr.trimEnd());
@@ -124,6 +128,21 @@ class Controller {
     }
     this.setState({ status: result.error ? "error" : "done", solve: trimResult(result, sources, c.get("maxModelsShown")), anim, ground, empty: false });
     this.updateStatusBar();
+    if (countAll) this.countModels(sources, my);
+  }
+
+  /** Count all answer sets without printing them, and add the number to the current result. */
+  async countModels(sources, my) {
+    const c = cfg();
+    const abort = this.countAbort = new AbortController();
+    const r = await solve(sources, {
+      models: 0, extraArgs: [...c.get("options"), "--quiet=2"], timeoutSeconds: c.get("timeoutSeconds"),
+      clingoPath: c.get("clingoPath"), managed: this.env.managed(), preferWasm: c.get("preferWasm"), signal: abort.signal,
+    });
+    if (my !== this.seq || r.cancelled || !this.state.solve) return;
+    this.state.solve.counting = false;
+    if (!r.error && !r.more && Number.isInteger(r.count)) this.state.solve.total = r.count;
+    this.post();
   }
 
   publishDiagnostics(sources, result) {
