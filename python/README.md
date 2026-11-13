@@ -29,7 +29,7 @@ ancestor(X,Y) :- parent(X,Y).
 ancestor(X,Z) :- parent(X,Y), ancestor(Y,Z).
 ```
 
-The output has four tabs. Animator steps through the rounds and shows which rule fired with which variable bindings. Answer Sets lists every model. Graph draws the atoms. Console shows clingo's messages and the position of any error.
+The output has five tabs. Animator steps through the rounds and shows which rule fired with which variable bindings. Grounding shows how each rule is expanded into ground rules, loop by loop. Answer Sets lists every model. Graph draws the atoms. Console shows clingo's messages and the position of any error.
 
 Cell options:
 
@@ -38,7 +38,7 @@ Cell options:
 | `-n 5`, `--models 5` | At most 5 answer sets (0 means all). |
 | `-o "--opt-mode=optN -c n=6"` | Extra clingo options. A value that starts with a dash is fine. |
 | `-t 20` | Timeout in seconds. The default is 10. |
-| `--tab answers` | First tab to show: `animator`, `answers`, `graph` or `console`. |
+| `--tab answers` | First tab to show: `animator`, `grounding`, `answers`, `graph` or `console`. |
 | `--theme dark` | `auto` (default), `light` or `dark`. Inside VS Code the editor theme is used. |
 | `--height 500` | Starting height in pixels. The output grows with its content. |
 | `--out res` | Keep the result in a variable called `res`. |
@@ -91,6 +91,7 @@ The exit code is 0 when the program ran, 1 when it has an error (positions print
 ## Notes
 
 - The animator follows positive programs only: no `not`, choice rules, constraints or ranges. For other programs it names the unsupported line, and the other three tabs still work.
+- The Grounding tab follows the structure of the rules, not clingo's grounder. A rule with an aggregate in its body is listed as not shown. Constants given with `-c` are not applied.
 - The visualizer runs in an isolated `<iframe>`. Jupyter shows such output only in trusted notebooks.
 - Outside notebooks and VS Code, the color theme follows the operating system.
 

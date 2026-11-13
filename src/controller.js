@@ -3,7 +3,7 @@ const vscode = require("vscode");
 const fs = require("fs");
 const path = require("path");
 const { solve, findClingo, resetClingoCache } = require("./solver");
-const { buildAnimation, trimResult } = require("./model");
+const { buildAnimation, buildGrounding, trimResult } = require("./model");
 const { getHtml } = require("./panel");
 const { Environment } = require("./environment");
 
@@ -23,12 +23,13 @@ class Controller {
     this.panel = null;
     this.ready = false;
     this.target = null;              // TextDocument the visualizer follows
-    this.state = { status: "idle", solve: null, anim: null };
+    this.state = { status: "idle", solve: null, anim: null, ground: null };
     this.seq = 0;
     this.abort = null;
     this.timer = null;
     this.sources = [];
     this.rules = [];                 // animator rules with source mapping (for editor highlighting)
+    this.groundRules = [];           // the same for the grounding tab
     this.ruleDeco = vscode.window.createTextEditorDecorationType({
       isWholeLine: true,
       backgroundColor: new vscode.ThemeColor("asp.activeRuleBackground"),
@@ -98,7 +99,7 @@ class Controller {
 
     if (!sources.some(s => s.text.trim())) {
       this.diagnostics.clear();
-      this.setState({ status: "idle", solve: null, anim: null, empty: true });
+      this.setState({ status: "idle", solve: null, anim: null, ground: null, empty: true });
       this.updateStatusBar();
       return;
     }
@@ -116,9 +117,12 @@ class Controller {
     if (result.stderr.trim()) this.log.appendLine(result.stderr.trimEnd());
 
     this.publishDiagnostics(sources, result);
-    let anim = null;
-    if (this.panel) { const built = buildAnimation(sources); this.rules = built.locations; anim = built.view; }
-    this.setState({ status: result.error ? "error" : "done", solve: trimResult(result, sources, c.get("maxModelsShown")), anim, empty: false });
+    let anim = null, ground = null;
+    if (this.panel) {
+      const built = buildAnimation(sources); this.rules = built.locations; anim = built.view;
+      const gb = buildGrounding(sources); this.groundRules = gb.locations; ground = gb.view;
+    }
+    this.setState({ status: result.error ? "error" : "done", solve: trimResult(result, sources, c.get("maxModelsShown")), anim, ground, empty: false });
     this.updateStatusBar();
   }
 
@@ -195,6 +199,7 @@ class Controller {
       case "reveal": await this.reveal(m.rule); break;
       case "revealLine": await this.revealLine(m.file, m.line); break;
       case "step": this.highlight(m); break;
+      case "groundStep": this.highlightGround(m); break;
       case "openSettings": vscode.commands.executeCommand("workbench.action.openSettings", "@ext:yakupbulbul.asp-studio"); break;
       case "copy": await vscode.env.clipboard.writeText(String(m.text || "")); vscode.window.setStatusBarMessage("ASP: copied", 1500); break;
       case "setup": this.env.showSetup(); break;
@@ -244,6 +249,21 @@ class Controller {
       ed.setDecorations(this.ruleDeco, e.ranges);
       ed.setDecorations(this.noteDeco, e.notes);
     }
+  }
+
+  /** Highlight the rule the grounding tab is working on. `m.rule` indexes `groundRules`, `m.note` says what happens. */
+  highlightGround(m) {
+    this.clearHighlights();
+    if (!cfg().get("animator.highlightRules")) return;
+    const r = m.rule === null || m.rule === undefined ? null : this.groundRules[m.rule];
+    if (!r) return;
+    const src = this.sources[r.sourceIndex];
+    const range = new vscode.Range(r.line, 0, r.endLine, 0);
+    const note = {
+      range: new vscode.Range(r.endLine, 0, r.endLine, 0),
+      renderOptions: { after: { contentText: "  ← grounding" + (m.note ? ": " + String(m.note).slice(0, 40) : ""), color: new vscode.ThemeColor("editorCodeLens.foreground"), fontStyle: "italic" } },
+    };
+    for (const ed of this.editorsFor(src.uri)) { ed.setDecorations(this.ruleDeco, [range]); ed.setDecorations(this.noteDeco, [note]); }
   }
 
   clearHighlights() {

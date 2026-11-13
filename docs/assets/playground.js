@@ -20,7 +20,7 @@
   var code = $("code"), hl = $("hl"), gutter = $("gutter"), problemsEl = $("problems"), statusEl = $("status");
   var frame = $("panel"), runBtn = $("run");
   var worker = null, workerReady = false, pending = {}, nextId = 1, seq = 0;
-  var lastState = null, lastAnim = null, problems = [], fireLines = {}, runTimer = null, panelReady = false;
+  var lastState = null, lastAnim = null, lastGround = null, problems = [], fireLines = {}, runTimer = null, panelReady = false;
 
   function setStatus(text, cls) { statusEl.textContent = text; statusEl.className = "pg-status" + (cls ? " " + cls : ""); }
 
@@ -162,7 +162,7 @@
     var my = ++seq, program = code.value;
     fireLines = {};
     if (!program.trim()) {
-      problems = []; renderProblems(); renderEditor(); lastAnim = null;
+      problems = []; renderProblems(); renderEditor(); lastAnim = null; lastGround = null;
       post({ type: "state", file: { name: "playground.lp", scope: "activeFile" }, status: "idle", solve: null, anim: null, empty: true, settings: { speed: 1400 } });
       setStatus("Ready", ""); return;
     }
@@ -181,7 +181,8 @@
     problems = s.diagnostics.slice();
     renderProblems(); renderEditor();
     lastAnim = window.AspEngine ? window.AspEngine.animationFor(program, "playground.lp") : null;
-    post({ type: "state", file: { name: "playground.lp", scope: "activeFile" }, status: s.error ? "error" : "done", solve: s, anim: lastAnim, empty: false, settings: { speed: 1400 } });
+    lastGround = window.AspEngine ? window.AspEngine.groundingFor(program, "playground.lp") : null;
+    post({ type: "state", file: { name: "playground.lp", scope: "activeFile" }, status: s.error ? "error" : "done", solve: s, anim: lastAnim, ground: lastGround, empty: false, settings: { speed: 1400 } });
     if (s.error) setStatus(s.timedOut ? "Timeout" : "Error", "bad");
     else setStatus(s.result + " · " + s.totalModels + (s.totalModels === 1 ? " model" : " models") + " · " + ms + " ms", s.result === "UNSATISFIABLE" ? "" : "ok");
   }
@@ -195,6 +196,12 @@
     else if (m.type === "reveal" && lastAnim && lastAnim.rules && lastAnim.rules[m.rule]) revealLine(lastAnim.rules[m.rule].line);
     else if (m.type === "revealLine") revealLine(m.line);
     else if (m.type === "copy") { if (navigator.clipboard) navigator.clipboard.writeText(String(m.text || "")); }
+    else if (m.type === "groundStep") {
+      fireLines = {};
+      var gr = lastGround && lastGround.rules && m.rule !== null ? lastGround.rules[m.rule] : null;
+      if (gr) for (var gl = gr.line; gl <= (gr.endLine || gr.line); gl++) fireLines[gl] = true;
+      renderEditor();
+    }
     else if (m.type === "step") {
       fireLines = {};
       if (lastAnim && lastAnim.rules) Object.keys(m.rules || {}).forEach(function (idx) {

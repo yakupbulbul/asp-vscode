@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- New **Grounding** tab. It animates how clingo's grounding turns a rule with variables into ground rules. For `{ c(N,C) : color(C) } = 1 :- node(N).` the body literal `node(N)` is the outer loop, the conditional literal `color(C)` is an inner loop that fills a set, and when it ends the set closes as `{ c(1,r); c(1,g); c(1,b) } = 1.` The panel highlights the active part of the rule, lists the loops with their current values, shows the set being built and the ground rules so far, and ends with the number of answer sets. It handles ranges, pools, normal rules, constraints, disjunctions, choice rules with bounds and conditions, comparisons, `not`, arithmetic and `#const`. Steps and keys are the same as in the Animator (the step, play and reset commands work on both tabs), and the rule being expanded is highlighted in the editor. The steps are built from the rules themselves, so a rule with an aggregate in its body is listed as not shown. Also available in the playground, in notebooks (`--tab grounding`) and in the command line report.
+
 ## 0.2.7
 
 - Graph: edges bend only when needed. An edge that would run through another node becomes an arc whose height grows with its length, an edge with an opposite edge bows apart from it, and an edge that repeats the same ends gets its own arc. On a chain of nodes the long edges no longer pile up on the short ones, and in a cycle the edges stay straight. Self-loops point into the emptiest direction instead of always up, so they are no longer cut off at the edge of the picture. Edge labels are larger and have an outline.

@@ -31,7 +31,7 @@
   applyTheme();
 
   /* ---- messaging shim */
-  const TABS = { animator: "anim", anim: "anim", answers: "models", models: "models", graph: "graph", console: "console" };
+  const TABS = { animator: "anim", anim: "anim", answers: "models", models: "models", graph: "graph", console: "console", ground: "ground", grounding: "ground" };
   let saved = { tab: TABS[init.tab] || "anim" };
   window.acquireVsCodeApi = () => ({
     postMessage(m) {
@@ -44,10 +44,11 @@
   function deliver() {
     const text = init.program || "";
     const anim = text.trim() && window.AspEngine ? window.AspEngine.animationFor(text, init.title || "program") : null;
+    const ground = text.trim() && window.AspEngine ? window.AspEngine.groundingFor(text, init.title || "program") : null;
     const solve = init.state || null;
     window.postMessage({
       type: "state", file: { name: init.title || "program", scope: "activeFile" }, status: solve && solve.error ? "error" : "done",
-      solve, anim, empty: !text.trim(), settings: { speed: 1400 },
+      solve, anim, ground, empty: !text.trim(), settings: { speed: 1400 },
     }, "*");
   }
 

@@ -257,7 +257,7 @@
         "asp.animator.highlightRules": {
           "type": "boolean",
           "default": true,
-          "description": "Highlight the rules that fire in the current animator round in the editor."
+          "description": "Highlight the rules that fire in the current animator round, or that the Grounding tab is expanding, in the editor."
         }
       }
     },

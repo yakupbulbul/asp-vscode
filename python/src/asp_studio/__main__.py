@@ -28,7 +28,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     ap.add_argument("-o", "--options", default="", help='extra clingo options, e.g. "--opt-mode=optN"')
     ap.add_argument("-t", "--timeout", type=float, default=10.0, help="seconds (default 10)")
     ap.add_argument("--out", type=pathlib.Path, help="output file (default: <first file>.html)")
-    ap.add_argument("--tab", default="animator", choices=["animator", "answers", "graph", "console"])
+    ap.add_argument("--tab", default="animator", choices=["animator", "grounding", "answers", "graph", "console"])
     ap.add_argument("--theme", default="auto", choices=["auto", "light", "dark"])
     ap.add_argument("--open", action="store_true", help="open the report in the browser")
     a = ap.parse_args(join_option_values(sys.argv[1:] if argv is None else list(argv)))

@@ -21,13 +21,14 @@
   };
 
   /* ------------------------------------------------------------ state */
-  let st = { status: "idle", solve: null, anim: null, file: null, empty: false, settings: { speed: 1400 } };
+  let st = { status: "idle", solve: null, anim: null, ground: null, file: null, empty: false, settings: { speed: 1400 } };
   const saved = vscode.getState() || {};
   const ui = { tab: saved.tab || "anim", model: 0, hidden: new Set(saved.hidden || []), speed: saved.speed || 0 };
   const persist = () => vscode.setState({ tab: ui.tab, hidden: [...ui.hidden], speed: ui.speed });
 
   let aT = 0, aTimer = null, aSig = "", aPos = {}, aNodes = [], aColors = {};
   let gPos = {}, gSig = "";
+  let grT = 0, grSig = "";                                  // grounding tab: current step and a signature of the program
 
   /* ------------------------------------------------------------ helpers */
   const PALETTE = ["var(--c0)", "var(--c1)", "var(--c2)", "var(--c3)", "var(--c4)", "var(--c5)"];
@@ -156,7 +157,7 @@
   }
 
   /* ------------------------------------------------------------ shell */
-  const TABS = [["anim", "Animator"], ["models", "Answer Sets"], ["graph", "Graph"], ["console", "Console"]];
+  const TABS = [["anim", "Animator"], ["ground", "Grounding"], ["models", "Answer Sets"], ["graph", "Graph"], ["console", "Console"]];
 
   function renderShell() {
     const r = st.solve, busy = st.status === "solving";
@@ -191,7 +192,7 @@
       $("settingsBtn").onclick = () => vscode.postMessage({ type: "openSettings" });
     }
     const sl = $("setupLink"); if (sl) sl.onclick = () => vscode.postMessage({ type: "setup" });
-    document.querySelectorAll(".tab").forEach(b => b.onclick = () => { ui.tab = b.dataset.tab; persist(); stopAnim(); renderShell(); renderMain(); });
+    document.querySelectorAll(".tab").forEach(b => b.onclick = () => { ui.tab = b.dataset.tab; persist(); stopAnim(); renderShell(); renderMain(); if (ui.tab !== "anim" && ui.tab !== "ground") notifyStep(); });
   }
 
   function renderMain() {
@@ -200,7 +201,7 @@
     if (st.empty) { main.innerHTML = `<div class="empty"><h2>Empty program</h2>Write some rules, for example <code>a :- not b.</code></div>`; notifyStep(); return; }
     if (!st.solve && st.status === "solving") { main.innerHTML = `<div class="empty">Starting clingo…</div>`; return; }
     if (!st.solve) { main.innerHTML = `<div class="empty">Waiting for the first run…</div>`; return; }
-    ({ anim: viewAnim, models: viewModels, graph: viewGraph, console: viewConsole })[ui.tab]();
+    ({ anim: viewAnim, ground: viewGround, models: viewModels, graph: viewGraph, console: viewConsole })[ui.tab]();
   }
 
   function errorNotice() {
@@ -351,7 +352,182 @@
     aTimer = setInterval(() => { if (aT >= a.rounds.length - 1) { stopAnim(); updateAnim(); return; } aT++; updateAnim(); if (aT >= a.rounds.length - 1) stopAnim(); }, ms);
     updateAnim();
   }
-  function togglePlay() { if (ui.tab !== "anim") { ui.tab = "anim"; persist(); renderShell(); renderMain(); } aTimer ? (stopAnim(), updateAnim()) : playAnim(); }
+  function togglePlay() {
+    if (ui.tab !== "anim" && ui.tab !== "ground") { ui.tab = "anim"; persist(); renderShell(); renderMain(); }
+    const ground = ui.tab === "ground";
+    aTimer ? (stopAnim(), ground ? updateGround() : updateAnim()) : (ground ? playGround() : playAnim());
+  }
+  /** Step the tab that has a transport (Animator or Grounding): `to` is an absolute position or a +/- delta. */
+  function move(what) {
+    if (ui.tab === "anim") stepTo(what === "reset" ? 0 : aT + what);
+    else if (ui.tab === "ground") groundTo(what === "reset" ? 0 : grT + what);
+  }
+
+
+  /* ------------------------------------------------------------ grounding */
+  const G_HEAD = { fact: "Fact", body: "Body matches", elem: "Conditional literal", close: "Set closed", inst: "Rule instance", bulk: "More instances", none: "No instance", end: "Done" };
+  const codeList = (items, max = 6) => items.slice(0, max).map(x => `<code>${esc(x)}</code>`).join(", ") + (items.length > max ? ` and ${items.length - max} more` : "");
+  const bindList = sub => sub.filter(([v]) => v !== "_").map(([v, x]) => `<code>${esc(v)} = ${esc(x)}</code>`).join(", ");
+
+  function groundSignature(g) { return g && !g.error ? g.rules.map(r => r.text).join("|") + "#" + g.steps.length + ":" + g.ground.length : "x"; }
+
+  function groundNotices(g) {
+    let h = errorNotice();
+    if (g.incomplete) h += `<div class="notice"><b>Incomplete rule</b> (missing final “.”): <code>${esc(g.incomplete)}</code></div>`;
+    if (g.skipped && g.skipped.length) {
+      h += `<div class="notice"><b>${plural(g.skipped.length, "statement")} not shown.</b> They use something the grounding view does not support, so atoms they derive are missing here and rules that depend on them may show fewer instances.` +
+        g.skipped.slice(0, 3).map(x => `<br><a href="#" class="goLine" data-line="${x.line}" data-file="${esc(x.file)}">line ${x.line}</a> <code>${esc(x.text.length > 70 ? x.text.slice(0, 70) + "…" : x.text)}</code> <span class="muted small">${esc(x.msg)}</span>`).join("") +
+        (g.skipped.length > 3 ? `<br><span class="muted small">and ${g.skipped.length - 3} more</span>` : "") + `</div>`;
+    }
+    return h;
+  }
+
+  function viewGround() {
+    const g = st.ground, main = $("main");
+    if (!g) { main.innerHTML = errorNotice() || '<div class="empty">The grounding view is not available yet.</div>'; bindErrorLink(); return; }
+    if (g.error) {
+      main.innerHTML = `<div class="stack">${errorNotice()}<div class="notice"><b>The grounding view cannot show this program.</b><br>${esc(g.error.split("\n")[0])}` +
+        `${g.line ? ` <a href="#" id="goErr">(line ${g.line})</a>` : ""}<br><span class="muted small">It follows how rules with variables, ranges, choice rules and constraints are expanded. Aggregates in rule bodies are not supported. The <b>Answer Sets</b> and <b>Graph</b> tabs still work.</span></div></div>`;
+      bindErrorLink(); const e = $("goErr"); if (e) e.onclick = ev => { ev.preventDefault(); vscode.postMessage({ type: "revealLine", file: g.file, line: g.line }); };
+      notifyStep(); return;
+    }
+    const sig = groundSignature(g);
+    if (sig !== grSig) { grSig = sig; grT = 0; }
+    grT = Math.min(grT, g.steps.length - 1);
+    const last = g.steps.length - 1;
+    main.innerHTML = `<div class="stack">
+      ${groundNotices(g)}
+      <div class="card">
+        <div class="transport">
+          <button class="icon-btn" id="aReset" title="Reset to the first step (R)" aria-label="Reset">${ICON.reset}</button>
+          <button class="icon-btn" id="aBack" title="Step back (←)" aria-label="Step back">${ICON.back}</button>
+          <button class="icon-btn" id="aPlay" title="Play / pause (Space)" aria-label="Play">${ICON.play}</button>
+          <button class="icon-btn" id="aNext" title="Step forward (→)" aria-label="Step forward">${ICON.next}</button>
+          <div class="timeline"><input type="range" id="aRange" min="0" max="${last}" value="${grT}" ${last === 0 ? "disabled" : ""} aria-label="Step"></div>
+          <select id="aSpeed" title="Speed" aria-label="Speed">
+            ${[["Slow", 2400], ["Normal", 1400], ["Fast", 700], ["Instant", 300]].map(([l, v]) => `<option value="${v}" ${closestSpeed() === v ? "selected" : ""}>${l}</option>`).join("")}
+          </select>
+        </div>
+        <div class="status-line" id="aStatus" role="status" aria-live="polite"></div>
+        <div class="pad gexplain" id="gExplain"></div>
+      </div>
+      <div class="grid2">
+        <section class="card"><h3>Rules <span class="muted small" style="text-transform:none;letter-spacing:0">${EMBED ? "" : "click a rule to jump to its line"}</span></h3><ul class="rules" id="aRules"></ul></section>
+        <div class="stack">
+          <section class="card"><h3>Current rule</h3><div class="pad"><div class="rtext" id="gRule"></div></div></section>
+          <section class="card"><h3>Loops</h3><div class="loops" id="gLoops"></div></section>
+          <section class="card"><h3>Ground rule being built</h3><div class="pad" id="gBuild"></div></section>
+        </div>
+      </div>
+      <section class="card"><h3>Ground rules so far <span class="muted small" id="gCount" style="text-transform:none;letter-spacing:0"></span></h3><div class="glist" id="gGround"></div></section>
+    </div>`;
+    bindErrorLink();
+    main.querySelectorAll(".goLine").forEach(a => a.onclick = ev => { ev.preventDefault(); vscode.postMessage({ type: "revealLine", file: a.dataset.file, line: +a.dataset.line }); });
+    $("aNext").onclick = () => groundTo(grT + 1);
+    $("aBack").onclick = () => groundTo(grT - 1);
+    $("aReset").onclick = () => { stopAnim(); groundTo(0); };
+    $("aPlay").onclick = togglePlay;
+    $("aRange").oninput = e => { stopAnim(); groundTo(+e.target.value); };
+    $("aSpeed").onchange = e => { ui.speed = +e.target.value; persist(); if (aTimer) { stopAnim(); playGround(); } };
+    updateGround();
+  }
+
+  function groundTo(t) {
+    const g = st.ground; if (!g || g.error) return;
+    grT = Math.max(0, Math.min(g.steps.length - 1, t));
+    updateGround();
+  }
+
+  function groundCaption(step, rule, g) {
+    const bind = bindList(step.sub), lastLv = step.levels[step.levels.length - 1];
+    const pos = lv => lv && lv.n > 1 ? ` <span class="muted">(${lv.i} of ${lv.n})</span>` : "";
+    const body = step.levels.filter(l => l.k[0] === "b"), cond = step.levels.filter(l => l.k[0] === "c");
+    switch (step.kind) {
+      case "fact": {
+        const same = step.total === 1 && step.atoms[0] + "." === rule.text;
+        return same ? `<code>${esc(rule.text)}</code> is a fact. It has no variables, so it is already ground.` :
+          `<code>${esc(rule.text)}</code> is a fact with a range or a pool. It expands to ${plural(step.total, "ground fact")}: ${codeList(step.atoms)}.`;
+      }
+      case "body":
+        return (body.length ? `Body ${body.map(l => `<code>${esc(l.text)}</code>`).join(", ")}: ${bind ? bind + pos(body[body.length - 1]) : "no variables"}.` : "This rule has no body, so there is a single instance.") + " A new set opens for it.";
+      case "elem": {
+        const lv = cond[cond.length - 1], which = lv ? `<code>${esc(lv.text)}</code>` : "The element";
+        return `${which}${lv && lv.bind.length ? ": " + bindList(lv.bind) : ""}${pos(lv)}. ${step.dup ? `<code>${esc(step.atom)}</code> is already in the set.` : `<code>${esc(step.atom)}</code> joins the set.`}`;
+      }
+      case "close": {
+        const cs = rule.parts.filter(p => /^c\d/.test(p.k || "")).map(p => p.t.trim());
+        return `${cs.length ? `<code>${esc(cs[0])}</code> has no more values. ` : ""}The set is closed${step.empty ? ". It is empty, so nothing is added." : step.dup ? ". This ground rule already exists." : ` and becomes the ground rule <code>${esc(step.text)}</code>`}`;
+      }
+      case "inst": {
+        const out = step.total === 1 ? (step.fresh[0] ? `Ground rule: <code>${esc(step.texts[0])}</code>.` : `<code>${esc(step.texts[0])}</code> already exists.`) : `${step.total} ground rules: ${codeList(step.texts, 3)}.`;
+        return `${body.length ? `Body matches with ${bind || "no variables"}${pos(lastLv)}. ` : ""}${out}` +
+          (step.rej ? ` <span class="muted">${plural(step.rej, "other combination")} failed a comparison or <code>not</code> test on the way.</span>` : "");
+      }
+      case "bulk": return `${plural(step.hidden, "more instance")} of this rule (${step.total} in total) are grounded without a step each, to keep the animation short. They are in the list below.`;
+      case "none": return `The body of this rule never matches, so it gives no ground rule.`;
+      default: {
+        const r = st.solve;
+        let res = "";
+        if (r && !r.error) res = r.result === "UNSATISFIABLE" ? " clingo finds no answer set." : ` clingo finds ${r.more ? "at least " : ""}${plural(r.totalModels, "answer set")}.`;
+        return `Grounding is complete: ${plural(g.ground.length, "ground rule")}.${res} <span class="muted">clingo's own grounder simplifies a little more and may order the rules differently.</span>`;
+      }
+    }
+  }
+
+  function updateGround() {
+    const g = st.ground; if (!g || g.error || !$("aStatus")) return;
+    const steps = g.steps, last = steps.length - 1, step = steps[grT], rule = step.rule === null ? null : g.rules[step.rule], atEnd = grT >= last;
+    $("aBack").disabled = grT === 0; $("aReset").disabled = grT === 0; $("aNext").disabled = atEnd;
+    $("aRange").value = grT;
+    $("aPlay").innerHTML = aTimer ? ICON.pause : ICON.play;
+    $("aStatus").innerHTML = `<span class="tag ${atEnd ? "done" : ""}">Step ${grT + 1} / ${steps.length}</span> ${esc(G_HEAD[step.kind])}${rule ? ` <span class="muted" style="font-weight:400">· rule ${step.rule + 1}</span>` : ""}`;
+    $("gExplain").innerHTML = groundCaption(step, rule, g);
+
+    const per = {}; g.ground.slice(0, step.n).forEach(x => { per[x.rule] = (per[x.rule] || 0) + 1; });
+    $("aRules").innerHTML = g.rules.map((r, i) => `<li class="rule ${i === step.rule ? "active" : ""}" data-i="${i}" tabindex="0" title="${esc(r.file)}, line ${r.line}"><span class="ln">${i + 1}</span><code>${esc(r.text)}</code><span class="n">${per[i] ? "→ " + per[i] : ""}</span></li>`).join("");
+    document.querySelectorAll("#aRules .rule").forEach(li => {
+      const r = g.rules[+li.dataset.i], go = () => vscode.postMessage({ type: "revealLine", file: r.file, line: r.line });
+      li.onclick = go; li.onkeydown = e => { if (e.key === "Enter") go(); };
+    });
+
+    const on = new Set(step.act);
+    $("gRule").innerHTML = rule ? rule.parts.map(p => p.k ? `<span class="seg${on.has(p.k) ? " on" : ""}">${esc(p.t)}</span>` : esc(p.t)).join("") : '<span class="muted">All rules are grounded.</span>';
+
+    const depth = step.levels.length;
+    let loops = step.levels.map((l, d) => `<div class="loop${l.k[0] === "c" ? " cond" : ""}" style="padding-left:${12 + d * 20}px"><span class="kw">for</span> <code>${esc(l.text)}</code><span class="arrow">→</span>` +
+      `${l.bind.length ? l.bind.map(([v, x]) => `<code class="val">${esc(v)} = ${esc(x)}</code>`).join(" ") : '<span class="muted">matches</span>'}<span class="muted small">${l.n > 1 ? `${l.i} of ${l.n}` : "only value"}</span></div>`).join("");
+    if (step.kind === "close" && rule) rule.parts.filter(p => /^c\d/.test(p.k || "")).forEach(p => { loops += `<div class="loop done" style="padding-left:${12 + depth * 20}px"><span class="kw">end</span> <code>${esc(p.t.trim())}</code><span class="muted small">no more values</span></div>`; });
+    $("gLoops").innerHTML = loops || `<div class="pad muted">${step.kind === "end" ? "Nothing left to ground." : step.kind === "bulk" ? "Not shown step by step." : step.kind === "fact" ? "A fact needs no loop." : "No loop: this rule has no body literal that binds a variable."}</div>`;
+
+    let build = "";
+    if (["body", "elem"].includes(step.kind) && rule && rule.build) {
+      const b = rule.build, chips = step.set.map((a, k) => atomChip(a, predColor(atomPred(a)), { fresh: k === step.set.length - 1 && step.kind === "elem" && !step.dup }));
+      build = `<code class="gr">${esc(b.pre)}</code>${chips.length ? chips.join('<code class="gr">' + esc(b.sep) + "</code>") : '<span class="muted">(empty)</span>'}<code class="gr">${esc(b.post)}</code>`;
+    } else if (step.kind === "close") build = step.empty ? '<span class="muted">(nothing)</span>' : `<code class="gr${step.dup ? "" : " new"}">${esc(step.text)}</code>${step.dup ? ' <span class="muted small">already exists</span>' : ""}`;
+    else if (step.kind === "inst") build = step.texts.map((t, k) => `<div><code class="gr${step.fresh[k] ? " new" : ""}">${esc(t)}</code></div>`).join("") + (step.total > step.texts.length ? `<span class="muted small">… ${step.total - step.texts.length} more</span>` : "");
+    else if (step.kind === "fact") build = step.atoms.map(a => `<code class="gr new">${esc(a)}.</code>`).join(" ") + (step.total > step.atoms.length ? ` <span class="muted small">… ${step.total - step.atoms.length} more</span>` : "");
+    $("gBuild").innerHTML = build || '<span class="muted">—</span>';
+
+    const prev = grT > 0 ? steps[grT - 1].n : 0, shown = g.ground.slice(0, step.n), SHOW = 200, from = Math.max(0, shown.length - SHOW);
+    $("gCount").textContent = `· ${shown.length}`;
+    $("gGround").innerHTML = (from ? `<div class="gline muted small">… ${from} earlier rules not shown</div>` : "") +
+      shown.slice(from).map((x, k) => `<div class="gline${from + k >= prev && grT > 0 ? " fresh" : ""}"><span class="ln">${from + k + 1}</span><code>${esc(x.text)}</code><span class="from">rule ${x.rule + 1}</span></div>`).join("") || '<div class="pad muted">Nothing yet.</div>';
+    const fr = $("gGround").querySelector(".fresh:last-child"); if (fr) $("gGround").scrollTop = fr.offsetTop - 60;
+    notifyGround(step);
+  }
+
+  let groundTimer = null;
+  function notifyGround(step) {
+    clearTimeout(stepTimer); clearTimeout(groundTimer);
+    groundTimer = setTimeout(() => vscode.postMessage({ type: "groundStep", rule: step.rule, note: step.rule === null ? "" : G_HEAD[step.kind].toLowerCase() }), 40);
+  }
+  function playGround() {
+    const g = st.ground; if (!g || g.error) return;
+    if (grT >= g.steps.length - 1) grT = 0;
+    const ms = ui.speed || st.settings.speed || 1400;
+    aTimer = setInterval(() => { if (grT >= g.steps.length - 1) { stopAnim(); updateGround(); return; } grT++; updateGround(); if (grT >= g.steps.length - 1) stopAnim(); }, ms);
+    updateGround();
+  }
 
   /* ------------------------------------------------------------ answer sets */
   function chipGroups(atoms) {
@@ -435,22 +611,21 @@
       const hadProgram = aSig;
       st = { ...st, ...m };
       if (!st.anim || st.anim.error) aSig = "";
+      if (!st.ground || st.ground.error) grSig = "";
       if (st.settings && !ui.speed) ui.speed = 0;
       stopAnim(); renderShell(); renderMain();
       void hadProgram;
     } else if (m.type === "command") {
-      if (m.name === "next") { if (ui.tab !== "anim") return; stopAnim(); stepTo(aT + 1); }
-      else if (m.name === "back") { if (ui.tab !== "anim") return; stopAnim(); stepTo(aT - 1); }
-      else if (m.name === "reset") { if (ui.tab !== "anim") return; stopAnim(); stepTo(0); }
-      else if (m.name === "play") togglePlay();
+      if (m.name === "play") togglePlay();
+      else if (["next", "back", "reset"].includes(m.name) && (ui.tab === "anim" || ui.tab === "ground")) { stopAnim(); move(m.name === "next" ? 1 : m.name === "back" ? -1 : "reset"); }
     }
   });
   addEventListener("keydown", e => {
-    if (ui.tab !== "anim" || /^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement.tagName) || e.metaKey || e.ctrlKey || e.altKey) return;
-    if (e.key === "ArrowRight") { e.preventDefault(); stopAnim(); stepTo(aT + 1); }
-    else if (e.key === "ArrowLeft") { e.preventDefault(); stopAnim(); stepTo(aT - 1); }
+    if ((ui.tab !== "anim" && ui.tab !== "ground") || /^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement.tagName) || e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.key === "ArrowRight") { e.preventDefault(); stopAnim(); move(1); }
+    else if (e.key === "ArrowLeft") { e.preventDefault(); stopAnim(); move(-1); }
     else if (e.key === " ") { e.preventDefault(); togglePlay(); }
-    else if (e.key === "r") { stopAnim(); stepTo(0); }
+    else if (e.key === "r") { stopAnim(); move("reset"); }
   });
 
   renderShell(); renderMain();

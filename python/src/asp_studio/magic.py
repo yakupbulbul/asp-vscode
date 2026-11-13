@@ -17,7 +17,7 @@ def _parser() -> argparse.ArgumentParser:
     p.add_argument("-n", "--models", type=int, default=0, help="max answer sets (0 = all)")
     p.add_argument("-o", "--options", default="", help="extra clingo options, quoted")
     p.add_argument("-t", "--timeout", type=float, default=10.0)
-    p.add_argument("--tab", default="animator", choices=["animator", "answers", "graph", "console"])
+    p.add_argument("--tab", default="animator", choices=["animator", "grounding", "answers", "graph", "console"])
     p.add_argument("--theme", default="auto", choices=["auto", "light", "dark"])
     p.add_argument("--height", type=int, default=None)
     p.add_argument("--out", default=None, help="store the Result in this variable")
@@ -30,7 +30,7 @@ class AspMagics(Magics):
     def asp(self, line: str, cell: str) -> Any:
         """Solve the cell with clingo and show answer sets, graph and animator.
 
-        %%asp [-n N] [-o "--opt-mode=optN"] [-t SECONDS] [--tab animator|answers|graph|console]
+        %%asp [-n N] [-o "--opt-mode=optN"] [-t SECONDS] [--tab animator|grounding|answers|graph|console]
               [--theme auto|light|dark] [--height PX] [--out NAME]
         """
         try:

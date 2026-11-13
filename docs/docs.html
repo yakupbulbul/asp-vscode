@@ -40,6 +40,7 @@
     <a href="#quick-start">Quick start</a>
     <a href="#playground">Online playground</a>
     <a href="#animator">The animator</a>
+    <a href="#grounding">The Grounding tab</a>
     <a href="#commands">Commands and keys</a>
     <a href="#settings">Settings</a>
     <a href="#tools">Setting up tools</a>
@@ -76,13 +77,19 @@
     <div class="note"><p>The animator rejects rules with <code>not</code>, choice rules, constraints and ranges such as <code>1..n</code>. The message names the offending line. The Answer Sets, Graph and Console tabs work for every program clingo accepts.</p></div>
     <p>Inside the panel, <kbd>←</kbd> and <kbd>→</kbd> step, <kbd>Space</kbd> plays or pauses and <kbd>R</kbd> resets.</p>
 
+    <h2 id="grounding">The Grounding tab</h2>
+    <p>The Grounding tab shows how a rule with variables becomes ground rules, one step at a time. Take <code>node(1..2). color(r;g;b). { c(N,C) : color(C) } = 1 :- node(N).</code></p>
+    <p>The body literal <code>node(N)</code> is the outer loop: N is 1, then 2. For each N the conditional literal <code>color(C)</code> is an inner loop that adds <code>c(N,C)</code> to a set. When C has run through all colors, the set closes and becomes the ground rule <code>{ c(1,r); c(1,g); c(1,b) } = 1.</code></p>
+    <p>The panel highlights the part of the rule that is active, lists the loops with their current values, shows the set while it is being built, and keeps the ground rules produced so far. The last step shows how many answer sets clingo finds. The arrow keys, <kbd>Space</kbd> and <kbd>R</kbd> work as in the animator, and the rule being expanded is highlighted in the editor.</p>
+    <div class="note"><p>The steps follow the structure of your rules, not clingo's internal grounder, which simplifies a little more and may order rules differently. Facts with ranges and pools, normal rules, constraints, disjunctions, choice rules, comparisons, <code>not</code>, arithmetic and <code>#const</code> are supported. A rule with an aggregate in its body is listed as not shown, and atoms it would derive are then missing. A rule with many instances shows the first 60 and groups the rest into one step. Constants given with <code>-c</code> are not applied.</p></div>
+
     <h2 id="commands">Commands and keys</h2>
     <div class="table-wrap"><table>
       <thead><tr><th>Command</th><th>What it does</th><th>Key</th></tr></thead>
       <tbody>
         <tr><td>ASP: Open Visualizer</td><td>Opens the panel for the active <code>.lp</code> file.</td><td>editor title icon</td></tr>
         <tr><td>ASP: Solve Current File</td><td>Computes all answer sets.</td><td><kbd>Cmd</kbd> <kbd>Alt</kbd> <kbd>Enter</kbd> or <kbd>Ctrl</kbd> <kbd>Alt</kbd> <kbd>Enter</kbd></td></tr>
-        <tr><td>ASP: Animator: Step Forward / Back</td><td>Moves one round.</td><td><kbd>Ctrl</kbd> <kbd>Alt</kbd> <kbd>→</kbd> / <kbd>←</kbd></td></tr>
+        <tr><td>ASP: Animator: Step Forward / Back</td><td>Moves one round, or one step in the Grounding tab.</td><td><kbd>Ctrl</kbd> <kbd>Alt</kbd> <kbd>→</kbd> / <kbd>←</kbd></td></tr>
         <tr><td>ASP: Animator: Play / Pause</td><td>Plays the rounds in sequence.</td><td><kbd>Ctrl</kbd> <kbd>Alt</kbd> <kbd>Space</kbd></td></tr>
         <tr><td>ASP: Animator: Reset to Round 0</td><td>Goes back to the facts.</td><td></td></tr>
         <tr><td>ASP: Set Up Environment…</td><td>Installs native clingo, a syntax highlighter and viASP. See <a href="#tools">below</a>.</td><td></td></tr>
@@ -149,7 +156,7 @@ asp.show(res, tab="graph")</pre>
         <tr><td><code>-n 5</code></td><td>At most 5 answer sets. 0 means all.</td></tr>
         <tr><td><code>-o "--opt-mode=optN -c n=6"</code></td><td>Extra clingo options.</td></tr>
         <tr><td><code>-t 20</code></td><td>Timeout in seconds. Default 10.</td></tr>
-        <tr><td><code>--tab answers</code></td><td>First tab to show: <code>animator</code>, <code>answers</code>, <code>graph</code> or <code>console</code>.</td></tr>
+        <tr><td><code>--tab answers</code></td><td>First tab to show: <code>animator</code>, <code>grounding</code>, <code>answers</code>, <code>graph</code> or <code>console</code>.</td></tr>
         <tr><td><code>--theme dark</code></td><td><code>auto</code>, <code>light</code> or <code>dark</code>. In VS Code notebooks the editor theme is used.</td></tr>
         <tr><td><code>--out res</code></td><td>Keep the result in a variable called <code>res</code>.</td></tr>
       </tbody>

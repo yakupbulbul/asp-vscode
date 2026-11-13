@@ -24,6 +24,7 @@ ASP Studio runs [clingo](https://potassco.org/clingo/) on your Answer Set Progra
 - [First steps](#first-steps)
 - [Setting up tools](#setting-up-tools)
 - [Animator limits](#animator-limits)
+- [The Grounding tab](#the-grounding-tab)
 - [Commands, keys and settings](#commands-and-keys)
 - [Notebooks and Python](#notebooks-and-python)
 - [Questions](#questions)
@@ -99,13 +100,28 @@ Nothing outside the extension's storage folder changes. **ASP: Remove Private En
 
 The animator follows positive programs: facts and rules without `not`. It rejects negation, choice rules `{ ... }`, constraints `:- ...` and ranges `1..n`, and the message names the line. For such programs the Answer Sets, Graph and Console tabs still work.
 
+## The Grounding tab
+
+The Grounding tab shows how a rule with variables becomes ground rules, one step at a time. Take this program:
+
+```prolog
+node(1..2). color(r;g;b).
+{ c(N,C) : color(C) } = 1 :- node(N).
+```
+
+The body literal `node(N)` is the outer loop: N is 1, then 2. For each N the conditional literal `color(C)` is an inner loop that adds `c(N,C)` to a set. When C has run through all colors, the set closes and becomes the ground rule `{ c(1,r); c(1,g); c(1,b) } = 1.`
+
+The panel highlights the part of the rule that is active, lists the loops with their current values, shows the set while it is being built, and keeps the ground rules produced so far. The last step shows how many answer sets clingo finds. The same keys as in the Animator work: the arrow keys step, <kbd>Space</kbd> plays or pauses and <kbd>R</kbd> resets. The rule being expanded is highlighted in the editor as well.
+
+The steps come from the structure of your rules, not from clingo's internal grounder, which simplifies a little more and may order rules differently. The view handles facts with ranges and pools, normal rules, constraints, disjunctions, choice rules with bounds and conditions, comparisons, `not`, arithmetic and `#const`. A rule with an aggregate in its body, or another unsupported feature, is listed as not shown, and atoms it would derive are then missing. A rule that needs many instances shows the first 60 and groups the rest into one step. Constants given with `-c` are not applied.
+
 ## Commands and keys
 
 | Command | Default key |
 |---|---|
 | ASP: Open Visualizer | editor title icon |
 | ASP: Solve Current File | `⌘⌥Enter` or `Ctrl+Alt+Enter` |
-| ASP: Animator: Step Forward / Back | `Ctrl+Alt+→` / `Ctrl+Alt+←` |
+| ASP: Animator: Step Forward / Back (also steps the Grounding tab) | `Ctrl+Alt+→` / `Ctrl+Alt+←` |
 | ASP: Animator: Play / Pause | `Ctrl+Alt+Space` |
 | ASP: Animator: Reset to Round 0 | |
 | ASP: Set Up Environment… | |
